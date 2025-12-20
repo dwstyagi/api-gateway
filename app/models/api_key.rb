@@ -27,21 +27,21 @@ class ApiKey < ApplicationRecord
   def self.generate_for_user(user, name:, scopes:, environment: :live)
     prefix = environment == :test ? "pk_test_" : "pk_live_"
     random_part = SecureRandom.hex(16) # 32 characters
+    plaintext = "#{prefix}#{random_part}"
 
     api_key = new(
       user: user,
       name: name,
       prefix: prefix,
+      key_hash: hash_key(plaintext),  # Set hash directly
       scopes: scopes,
       status: 'active'
     )
 
-    # Set plaintext key (will be hashed in before_create callback)
-    api_key.plaintext_key = "#{prefix}#{random_part}"
     api_key.save!
 
     # Return the plaintext key - this is the ONLY time it's available
-    api_key.plaintext_key
+    plaintext
   end
 
   # Authenticate with plaintext API key

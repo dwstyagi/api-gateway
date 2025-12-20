@@ -65,7 +65,9 @@ class RateLimitPolicy < ApplicationRecord
     tier_key = tier || 'default'
     redis_key = "policy:#{api_definition_id}:#{tier_key}"
 
-    $redis.hset(redis_key, to_config)
+    # Filter out nil values (Redis doesn't accept nil)
+    config = to_config.compact
+    $redis.hset(redis_key, config) if config.any?
   end
 
   def remove_from_redis

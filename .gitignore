@@ -41,6 +41,8 @@
 # Ignore documentation
 docs/
 
+test_files/
+
 # Ignore built assets
 /app/assets/builds/*
 !/app/assets/builds/.keep
