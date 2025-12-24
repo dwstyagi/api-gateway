@@ -57,6 +57,8 @@ class RateLimitingMiddleware
       [status, headers, body]
     else
       # Request denied - return 429 Too Many Requests
+      # Track rate limit abuse for auto-blocking
+      AutoBlockerService.record_rate_limit_abuse(request.ip)
       rate_limited_response(policy, result)
     end
   rescue StandardError => e

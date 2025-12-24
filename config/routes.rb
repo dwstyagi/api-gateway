@@ -15,6 +15,17 @@ Rails.application.routes.draw do
     get 'me', to: 'users#me'
   end
 
+  # Admin endpoints (protected by authentication + admin check)
+  namespace :admin do
+    # IP Rules Management
+    resources :ip_rules
+    post 'ip_rules/block', to: 'ip_rules#block_ip'
+    post 'ip_rules/unblock', to: 'ip_rules#unblock_ip'
+    get 'ip_rules/blocked', to: 'ip_rules#blocked_ips'
+    get 'ip_rules/violations/:ip', to: 'ip_rules#violations'
+    post 'ip_rules/clear_violations', to: 'ip_rules#clear_violations'
+  end
+
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check
 
@@ -28,6 +39,6 @@ Rails.application.routes.draw do
   match '/*path', to: 'gateway#proxy', via: :all, constraints: ->(req) {
     # Only proxy if path matches an API definition pattern
     # This prevents proxying static assets and other Rails routes
-    !req.path.start_with?('/health', '/auth', '/assets', '/up', '/rails')
+    !req.path.start_with?('/health', '/auth', '/admin', '/assets', '/up', '/rails')
   }
 end

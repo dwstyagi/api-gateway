@@ -68,6 +68,7 @@ class AuthenticationMiddleware
     end
 
     # No authentication credentials provided
+    AutoBlockerService.record_auth_failure(request.ip)
     {
       success: false,
       error: 'MISSING_CREDENTIALS',
@@ -85,6 +86,7 @@ class AuthenticationMiddleware
     user = User.find_by(id: payload['sub'])
 
     unless user
+      AutoBlockerService.record_auth_failure(request.ip)
       return {
         success: false,
         error: 'USER_NOT_FOUND',
@@ -95,6 +97,9 @@ class AuthenticationMiddleware
     # Log successful authentication
     log_auth_success('jwt', user, request)
 
+    # Clear violations on successful auth
+    AutoBlockerService.clear_violations(request.ip)
+
     {
       success: true,
       user: user,
@@ -103,6 +108,7 @@ class AuthenticationMiddleware
 
   rescue JwtService::TokenExpiredError
     log_auth_failure('jwt', 'token_expired', request)
+    AutoBlockerService.record_auth_failure(request.ip)
     {
       success: false,
       error: 'TOKEN_EXPIRED',
@@ -127,6 +133,7 @@ class AuthenticationMiddleware
 
   rescue JwtService::TokenInvalidError => e
     log_auth_failure('jwt', 'invalid_token', request)
+    AutoBlockerService.record_invalid_jwt(request.ip)
     {
       success: false,
       error: 'INVALID_TOKEN',
@@ -144,6 +151,7 @@ class AuthenticationMiddleware
 
     unless api_key
       log_auth_failure('api_key', 'invalid_key', request)
+      AutoBlockerService.record_invalid_api_key(request.ip)
       return {
         success: false,
         error: 'INVALID_API_KEY',
@@ -163,6 +171,9 @@ class AuthenticationMiddleware
 
     # Log successful authentication
     log_auth_success('api_key', api_key.user, request)
+
+    # Clear violations on successful auth
+    AutoBlockerService.clear_violations(request.ip)
 
     {
       success: true,
