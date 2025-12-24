@@ -17,13 +17,71 @@ Rails.application.routes.draw do
 
   # Admin endpoints (protected by authentication + admin check)
   namespace :admin do
+    # Users Management
+    resources :users do
+      collection do
+        get :stats
+      end
+      member do
+        post :revoke_tokens
+        post :change_tier
+      end
+    end
+
+    # API Keys Management
+    resources :api_keys, only: [:index, :show, :destroy] do
+      collection do
+        get :stats
+        post :bulk_revoke
+      end
+      member do
+        post :revoke
+        post :activate
+      end
+    end
+
+    # API Definitions Management
+    resources :api_definitions do
+      collection do
+        get :stats
+      end
+      member do
+        post :toggle
+        post :test
+      end
+    end
+
+    # Rate Limit Policies Management
+    resources :rate_limit_policies do
+      collection do
+        get :strategies
+        get :stats
+      end
+      member do
+        post :test
+      end
+    end
+
+    # Audit Logs (read-only)
+    resources :audit_logs, only: [:index, :show] do
+      collection do
+        get :stats
+        get :event_types
+        get :export
+        get :timeline
+      end
+    end
+
     # IP Rules Management
-    resources :ip_rules
-    post 'ip_rules/block', to: 'ip_rules#block_ip'
-    post 'ip_rules/unblock', to: 'ip_rules#unblock_ip'
-    get 'ip_rules/blocked', to: 'ip_rules#blocked_ips'
-    get 'ip_rules/violations/:ip', to: 'ip_rules#violations'
-    post 'ip_rules/clear_violations', to: 'ip_rules#clear_violations'
+    get 'ip_rules/violations/:ip', to: 'ip_rules#violations', constraints: { ip: /[^\/]+/ }
+    resources :ip_rules do
+      collection do
+        post :block, to: 'ip_rules#block_ip'
+        post :unblock, to: 'ip_rules#unblock_ip'
+        get :blocked, to: 'ip_rules#blocked_ips'
+        post :clear_violations
+      end
+    end
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

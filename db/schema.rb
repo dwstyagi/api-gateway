@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_20_162711) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_24_160744) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -50,12 +50,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_20_162711) do
     t.string "actor_ip", limit: 45
     t.string "resource_type", limit: 50
     t.string "resource_id", limit: 255
-    t.jsonb "changes"
+    t.jsonb "change_details"
     t.jsonb "metadata"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["actor_user_id"], name: "index_audit_logs_on_actor_user_id"
-    t.index ["changes"], name: "index_audit_logs_on_changes", using: :gin
+    t.index ["change_details"], name: "index_audit_logs_on_change_details", using: :gin
     t.index ["event_type"], name: "index_audit_logs_on_event_type"
     t.index ["metadata"], name: "index_audit_logs_on_metadata", using: :gin
     t.index ["resource_type", "resource_id"], name: "index_audit_logs_on_resource"

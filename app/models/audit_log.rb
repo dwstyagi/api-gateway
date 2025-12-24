@@ -50,7 +50,7 @@ class AuditLog < ApplicationRecord
       actor_ip: actor_ip,
       resource_type: resource_type,
       resource_id: resource_id,
-      changes: changes,
+      change_details: changes,  # Renamed column
       metadata: metadata
     )
   end
@@ -61,7 +61,7 @@ class AuditLog < ApplicationRecord
   end
 
   def self.with_change_to(field)
-    where("changes ? :field", field: field)
+    where("change_details ? :field", field: field)
   end
 
   # Get human-readable event description
@@ -72,7 +72,7 @@ class AuditLog < ApplicationRecord
     when EventTypes::API_KEY_CREATED
       "API key created: #{resource_id}"
     when EventTypes::IP_BLOCKED
-      "IP address blocked: #{changes&.dig('ip_address')}"
+      "IP address blocked: #{change_details&.dig('ip_address')}"
     else
       event_type.humanize
     end

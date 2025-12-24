@@ -174,7 +174,14 @@ class Admin::IpRulesController < ApplicationController
       }, status: :unprocessable_entity
     end
 
-    AutoBlockerService.unblock_ip(ip_address)
+    # Unblock from Redis if AutoBlockerService is available
+    if defined?(AutoBlockerService)
+      AutoBlockerService.unblock_ip(ip_address) rescue nil
+    end
+
+    # Remove from database
+    IpRule.where(ip_address: ip_address, rule_type: 'block').destroy_all
+
     log_admin_action('ip_unblocked', { ip_address: ip_address })
 
     render json: {
@@ -186,8 +193,12 @@ class Admin::IpRulesController < ApplicationController
   # GET /admin/ip_rules/blocked
   # List all currently blocked IPs (from Redis + DB)
   def blocked_ips
-    # Get from Redis (includes auto-blocked)
-    redis_blocked = AutoBlockerService.blocked_ips
+    # Get from Redis (includes auto-blocked) if AutoBlockerService is available
+    redis_blocked = if defined?(AutoBlockerService)
+                      AutoBlockerService.blocked_ips rescue []
+                    else
+                      []
+                    end
 
     # Get from database
     db_blocked = IpRule.blocked.active.pluck(:ip_address)
@@ -230,20 +241,28 @@ class Admin::IpRulesController < ApplicationController
     end
 
     violations = {}
-    AutoBlockerService::THRESHOLDS.keys.each do |violation_type|
-      count = AutoBlockerService.violation_count(ip_address, violation_type)
-      threshold = AutoBlockerService::THRESHOLDS[violation_type]
 
-      violations[violation_type] = {
-        count: count,
-        threshold: threshold[:limit],
-        window_seconds: threshold[:window],
-        block_duration: threshold[:block_duration],
-        percentage: (count.to_f / threshold[:limit] * 100).round(2)
-      }
+    # Only get violations if AutoBlockerService is available
+    if defined?(AutoBlockerService) && defined?(AutoBlockerService::THRESHOLDS)
+      begin
+        AutoBlockerService::THRESHOLDS.keys.each do |violation_type|
+          count = AutoBlockerService.violation_count(ip_address, violation_type)
+          threshold = AutoBlockerService::THRESHOLDS[violation_type]
+
+          violations[violation_type] = {
+            count: count,
+            threshold: threshold[:limit],
+            window_seconds: threshold[:window],
+            block_duration: threshold[:block_duration],
+            percentage: (count.to_f / threshold[:limit] * 100).round(2)
+          }
+        end
+      rescue => e
+        violations = { error: 'AutoBlockerService not fully configured' }
+      end
     end
 
-    whitelisted = AutoBlockerService.whitelisted?(ip_address)
+    whitelisted = defined?(AutoBlockerService) ? (AutoBlockerService.whitelisted?(ip_address) rescue false) : false
     blocked = IpRule.blocked?(ip_address)
 
     render json: {
@@ -272,7 +291,11 @@ class Admin::IpRulesController < ApplicationController
       }, status: :unprocessable_entity
     end
 
-    AutoBlockerService.clear_violations(ip_address)
+    # Clear violations if AutoBlockerService is available
+    if defined?(AutoBlockerService)
+      AutoBlockerService.clear_violations(ip_address) rescue nil
+    end
+
     log_admin_action('violations_cleared', { ip_address: ip_address })
 
     render json: {
@@ -341,7 +364,7 @@ class Admin::IpRulesController < ApplicationController
   def log_admin_action(action, details)
     AuditLog.create(
       event_type: "admin.#{action}",
-      user_id: request.env['current_user']&.id,
+      actor_user_id: request.env['current_user']&.id,
       actor_ip: request.ip,
       metadata: details.is_a?(Hash) ? details : { id: details.id }
     )

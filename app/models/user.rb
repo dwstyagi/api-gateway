@@ -4,6 +4,10 @@ class User < ApplicationRecord
   # Validates password presence and confirmation
   has_secure_password
 
+  # Constants
+  TIERS = %w[free pro enterprise].freeze
+  ROLES = %w[user admin].freeze
+
   # Associations
   has_many :api_keys, dependent: :destroy
   has_many :audit_logs, foreign_key: :actor_user_id, dependent: :nullify
