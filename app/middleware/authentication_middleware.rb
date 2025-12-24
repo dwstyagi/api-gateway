@@ -185,12 +185,13 @@ class AuthenticationMiddleware
   # @param path [String] Request path
   # @return [Boolean]
   def public_route?(path)
+    return true if path == '/'
+
     public_routes = [
       '/health',
       '/auth/login',
       '/auth/signup',
-      '/auth/refresh',
-      '/'
+      '/auth/refresh'
     ]
 
     public_routes.any? { |route| path.start_with?(route) }

@@ -20,4 +20,14 @@ Rails.application.routes.draw do
 
   # Root path
   root "health#show"
+
+  # Gateway proxy routes (catch-all - must be last!)
+  # All requests not matched above will be proxied to backend services
+  # The GatewayController will match against API definitions and forward requests
+  match '/api/*path', to: 'gateway#proxy', via: :all, constraints: ->(req) { req.path !~ /\A\/api\/me/ }
+  match '/*path', to: 'gateway#proxy', via: :all, constraints: ->(req) {
+    # Only proxy if path matches an API definition pattern
+    # This prevents proxying static assets and other Rails routes
+    !req.path.start_with?('/health', '/auth', '/assets', '/up', '/rails')
+  }
 end
