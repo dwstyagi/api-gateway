@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
-  # Health check endpoint (public)
+  # Health check endpoints (public)
   get '/health', to: 'health#show'
+  get '/health/detailed', to: 'health#detailed'
 
   # Web Authentication (session-based)
   get '/login', to: 'sessions#new', as: 'login'
@@ -98,6 +99,18 @@ Rails.application.routes.draw do
         post :unblock, to: 'ip_rules#unblock_ip'
         get :blocked, to: 'ip_rules#blocked_ips'
         post :clear_violations
+      end
+    end
+
+    # Metrics and Observability
+    resources :metrics, only: [:index] do
+      collection do
+        get :requests
+        get :errors
+        get :performance
+        get :throughput
+        get :timeseries
+        post :reset
       end
     end
   end
