@@ -63,6 +63,14 @@ class MetricsService
         $redis.hincrby(bucket_key, endpoint, 1)
         $redis.expire(bucket_key, window_size * 2) # Keep for 2x window size
       end
+
+      # Broadcast request event via WebSocket
+      broadcast_request_event(
+        endpoint: endpoint,
+        method: method,
+        response_time: response_time,
+        status_code: status_code
+      )
     end
 
     # Record an error
@@ -94,6 +102,13 @@ class MetricsService
 
       # Check if error rate is above threshold for alerting
       check_error_threshold(error_type)
+
+      # Broadcast error event via WebSocket
+      broadcast_error_event(
+        error_type: error_type,
+        endpoint: endpoint,
+        message: message
+      )
     end
 
     # Record response time for performance monitoring
@@ -320,8 +335,86 @@ class MetricsService
       # Alert if more than 100 errors of same type in last hour
       if count > 100
         Rails.logger.error("HIGH ERROR RATE ALERT: #{error_type} has #{count} occurrences")
-        # TODO: Integrate with AlertingService when implemented
+
+        # Broadcast alert via WebSocket
+        broadcast_alert(
+          level: 'error',
+          message: "High error rate: #{error_type} (#{count} occurrences)",
+          error_type: error_type,
+          count: count
+        )
       end
+    end
+
+    # Broadcast request event to WebSocket subscribers
+    def broadcast_request_event(endpoint:, method:, response_time:, status_code:)
+      ActionCable.server.broadcast(
+        'metrics:global',
+        {
+          type: 'request_logged',
+          data: {
+            endpoint: endpoint,
+            method: method,
+            response_time: response_time,
+            status_code: status_code,
+            throughput: calculate_throughput(:minute).round(2),
+            total_requests: get_counter('requests:total')
+          },
+          timestamp: Time.current.iso8601
+        }
+      )
+
+      # Also broadcast to endpoint-specific channel
+      ActionCable.server.broadcast(
+        "metrics:endpoint:#{endpoint}",
+        {
+          type: 'request_logged',
+          data: {
+            method: method,
+            response_time: response_time,
+            status_code: status_code
+          },
+          timestamp: Time.current.iso8601
+        }
+      )
+    rescue StandardError => e
+      Rails.logger.error("WebSocket broadcast error (request): #{e.message}")
+    end
+
+    # Broadcast error event to WebSocket subscribers
+    def broadcast_error_event(error_type:, endpoint:, message:)
+      ActionCable.server.broadcast(
+        'metrics:global',
+        {
+          type: 'error_logged',
+          data: {
+            error_type: error_type,
+            endpoint: endpoint,
+            message: message,
+            error_rate: calculate_error_rate,
+            total_errors: get_counter('errors:total')
+          },
+          timestamp: Time.current.iso8601
+        }
+      )
+    rescue StandardError => e
+      Rails.logger.error("WebSocket broadcast error (error): #{e.message}")
+    end
+
+    # Broadcast alert to WebSocket subscribers
+    def broadcast_alert(level:, message:, **metadata)
+      ActionCable.server.broadcast(
+        'metrics:global',
+        {
+          type: 'alert',
+          level: level,
+          message: message,
+          metadata: metadata,
+          timestamp: Time.current.iso8601
+        }
+      )
+    rescue StandardError => e
+      Rails.logger.error("WebSocket broadcast error (alert): #{e.message}")
     end
   end
 end

@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # WebSocket endpoint for Action Cable
+  mount ActionCable.server => '/cable'
+
   # Health check endpoints (public)
   get '/health', to: 'health#show'
   get '/health/detailed', to: 'health#detailed'

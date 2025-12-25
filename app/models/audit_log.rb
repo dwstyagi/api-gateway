@@ -43,7 +43,7 @@ class AuditLog < ApplicationRecord
 
   # Log an event with automatic timestamp
   def self.log_event(event_type:, actor_user: nil, actor_ip: nil, resource_type: nil, resource_id: nil, changes: nil, metadata: nil)
-    create!(
+    log = create!(
       timestamp: Time.current,
       event_type: event_type,
       actor_user_id: actor_user&.id,
@@ -53,6 +53,47 @@ class AuditLog < ApplicationRecord
       change_details: changes,  # Renamed column
       metadata: metadata
     )
+
+    # Broadcast to WebSocket subscribers
+    log.broadcast_event
+
+    log
+  end
+
+  # Broadcast this audit log event via WebSocket
+  def broadcast_event
+    ActionCable.server.broadcast(
+      'audit_logs:global',
+      {
+        type: 'audit_log_created',
+        data: as_json(include: :actor),
+        timestamp: Time.current.iso8601
+      }
+    )
+
+    # Also broadcast to event-type-specific channel
+    ActionCable.server.broadcast(
+      "audit_logs:#{event_type}",
+      {
+        type: 'audit_log_created',
+        data: as_json(include: :actor),
+        timestamp: Time.current.iso8601
+      }
+    )
+
+    # If there's an actor, broadcast to user-specific channel
+    if actor_user_id
+      ActionCable.server.broadcast(
+        "audit_logs:user:#{actor_user_id}",
+        {
+          type: 'audit_log_created',
+          data: as_json(include: :actor),
+          timestamp: Time.current.iso8601
+        }
+      )
+    end
+  rescue StandardError => e
+    Rails.logger.error("WebSocket broadcast error (audit log): #{e.message}")
   end
 
   # Helper method to query JSONB fields

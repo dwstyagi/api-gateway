@@ -24,6 +24,27 @@
     <%# Chartkick for charts (uses Google Charts) %>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <%= javascript_include_tag "chartkick", "data-turbo-track": "reload" %>
+
+    <%# Action Cable for WebSockets %>
+    <%= javascript_include_tag "actioncable", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "realtime_dashboard", "data-turbo-track": "reload" %>
+
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(100px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+      }
+      .animate-slide-in-right {
+        animation: slideInRight 0.3s ease-in-out;
+      }
+    </style>
   </head>
 
   <body class="bg-gray-50">
