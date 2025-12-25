@@ -4,8 +4,17 @@
 # Provides authentication and helper methods for API consumers
 class Consumer::ConsumerController < ApplicationController
   before_action :require_user
+  before_action :require_non_admin_user
 
   private
+
+  # Ensure only non-admin users can access the developer portal
+  # Admins should use the admin dashboard at /dashboard
+  def require_non_admin_user
+    if current_user.admin?
+      redirect_to dashboard_path, alert: "Admins should use the Admin Dashboard. Create a separate user account to test the developer experience."
+    end
+  end
 
   # Get user's requests in last 24 hours
   def get_user_requests_24h

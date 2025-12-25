@@ -10,7 +10,7 @@ class SessionsController < ApplicationController
   def new
     # Show login page
     redirect_to dashboard_path if current_user && current_user.admin?
-    redirect_to account_path if current_user && !current_user.admin?
+    redirect_to consumer_dashboard_path if current_user && !current_user.admin?
   end
 
   def create
@@ -34,7 +34,7 @@ class SessionsController < ApplicationController
       if user.admin?
         redirect_to dashboard_path, notice: 'Welcome back, Admin!'
       else
-        redirect_to account_path, notice: 'Welcome back!'
+        redirect_to consumer_dashboard_path, notice: 'Welcome to your Developer Portal!'
       end
     else
       # Authentication failed
