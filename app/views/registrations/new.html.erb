@@ -1,0 +1,144 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <!-- Logo and Title -->
+    <div>
+      <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-blue-600">
+        <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        API Gateway
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Create your account
+      </p>
+    </div>
+
+    <!-- Signup Form -->
+    <%= form_with url: signup_path, method: :post, class: "mt-8 space-y-6", local: true do |f| %>
+      <!-- Flash Messages -->
+      <% if flash[:alert] %>
+        <div class="rounded-md bg-red-50 p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-red-800">
+                <%= flash[:alert] %>
+              </p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="rounded-md shadow-sm space-y-4">
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+          <%= email_field_tag :email, params[:email],
+              autocomplete: "email",
+              required: true,
+              class: "appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm",
+              placeholder: "you@example.com" %>
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <%= password_field_tag :password, nil,
+              autocomplete: "new-password",
+              required: true,
+              class: "appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm",
+              placeholder: "••••••••" %>
+          <p class="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+        </div>
+
+        <!-- Password Confirmation Field -->
+        <div>
+          <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+          <%= password_field_tag :password_confirmation, nil,
+              autocomplete: "new-password",
+              required: true,
+              class: "appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm",
+              placeholder: "••••••••" %>
+        </div>
+
+        <!-- Tier Selection -->
+        <div>
+          <label for="tier" class="block text-sm font-medium text-gray-700 mb-1">Choose Your Plan</label>
+          <%= select_tag :tier,
+              options_for_select([
+                ['Free Tier - Get started for free', 'free'],
+                ['Pro Tier - For professionals', 'pro'],
+                ['Enterprise Tier - For organizations', 'enterprise']
+              ], 'free'),
+              class: "appearance-none relative block w-full px-3 py-3 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" %>
+          <div class="mt-2 space-y-1">
+            <p class="text-xs text-gray-600">
+              <span class="font-medium">Free:</span> 1,000 requests/day
+            </p>
+            <p class="text-xs text-gray-600">
+              <span class="font-medium">Pro:</span> 100,000 requests/day
+            </p>
+            <p class="text-xs text-gray-600">
+              <span class="font-medium">Enterprise:</span> Unlimited requests
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center">
+        <input id="terms" name="terms" type="checkbox" required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+        <label for="terms" class="ml-2 block text-sm text-gray-900">
+          I agree to the <a href="#" class="text-blue-600 hover:text-blue-500">Terms of Service</a> and <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+        </label>
+      </div>
+
+      <div>
+        <%= submit_tag "Create Account", class: "group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" %>
+      </div>
+
+      <div class="text-center">
+        <p class="text-sm text-gray-600">
+          Already have an account?
+          <a href="/login" class="font-medium text-blue-600 hover:text-blue-500">
+            Sign in here
+          </a>
+        </p>
+      </div>
+    <% end %>
+
+    <!-- Trust Indicators -->
+    <div class="mt-8">
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-2 bg-white text-gray-500">
+            Trusted by developers worldwide
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-6 grid grid-cols-3 gap-3">
+        <div class="text-center">
+          <p class="text-2xl font-bold text-blue-600">99.9%</p>
+          <p class="text-xs text-gray-600">Uptime</p>
+        </div>
+        <div class="text-center">
+          <p class="text-2xl font-bold text-green-600">1M+</p>
+          <p class="text-xs text-gray-600">Requests/day</p>
+        </div>
+        <div class="text-center">
+          <p class="text-2xl font-bold text-purple-600">&lt;50ms</p>
+          <p class="text-xs text-gray-600">Latency</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

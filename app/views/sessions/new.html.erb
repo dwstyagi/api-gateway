@@ -1,0 +1,151 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <!-- Logo and Title -->
+    <div>
+      <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-blue-600">
+        <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        API Gateway
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Sign in to your account
+      </p>
+    </div>
+
+    <!-- Login Form -->
+    <%= form_with url: login_path, method: :post, class: "mt-8 space-y-6", local: true do |f| %>
+      <input type="hidden" name="remember" value="true">
+
+      <!-- Flash Messages -->
+      <% if flash[:alert] %>
+        <div class="rounded-md bg-red-50 p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-red-800">
+                <%= flash[:alert] %>
+              </p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <% if flash[:notice] %>
+        <div class="rounded-md bg-green-50 p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-green-800">
+                <%= flash[:notice] %>
+              </p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="rounded-md shadow-sm -space-y-px">
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="sr-only">Email address</label>
+          <%= email_field_tag :email, params[:email],
+              autocomplete: "email",
+              required: true,
+              class: "appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm",
+              placeholder: "Email address" %>
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="sr-only">Password</label>
+          <%= password_field_tag :password, nil,
+              autocomplete: "current-password",
+              required: true,
+              class: "appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm",
+              placeholder: "Password" %>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <%= check_box_tag :remember_me, "1", false, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+          <label for="remember_me" class="ml-2 block text-sm text-gray-900">
+            Remember me
+          </label>
+        </div>
+
+        <div class="text-sm">
+          <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
+            Forgot your password?
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <%= submit_tag "Sign in", class: "group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" %>
+      </div>
+
+      <div class="text-center">
+        <p class="text-sm text-gray-600">
+          Don't have an account?
+          <a href="/signup" class="font-medium text-blue-600 hover:text-blue-500">
+            Sign up here
+          </a>
+        </p>
+      </div>
+    <% end %>
+
+    <!-- Features -->
+    <div class="mt-8">
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-2 bg-white text-gray-500">
+            Why use our API Gateway?
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="text-center">
+          <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-600 mx-auto">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <p class="mt-2 text-xs text-gray-600">Fast & Reliable</p>
+        </div>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-600 mx-auto">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <p class="mt-2 text-xs text-gray-600">Secure</p>
+        </div>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-100 text-purple-600 mx-auto">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <p class="mt-2 text-xs text-gray-600">Analytics</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -202,7 +202,12 @@ class AuthenticationMiddleware
       '/health',
       '/auth/login',
       '/auth/signup',
-      '/auth/refresh'
+      '/auth/refresh',
+      '/login',      # Web login page
+      '/signup',     # Web signup page
+      '/logout',     # Web logout
+      '/dashboard',  # Web admin dashboard (has its own auth check)
+      '/account'     # Web user dashboard (has its own auth check)
     ]
 
     public_routes.any? { |route| path.start_with?(route) }

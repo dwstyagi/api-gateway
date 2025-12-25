@@ -2,7 +2,25 @@ Rails.application.routes.draw do
   # Health check endpoint (public)
   get '/health', to: 'health#show'
 
-  # Authentication endpoints (public)
+  # Web Authentication (session-based)
+  get '/login', to: 'sessions#new', as: 'login'
+  post '/login', to: 'sessions#create'
+  delete '/logout', to: 'sessions#destroy', as: 'logout'
+  get '/logout', to: 'sessions#destroy' # Support GET for logout links
+
+  get '/signup', to: 'registrations#new', as: 'signup'
+  post '/signup', to: 'registrations#create'
+
+  # Admin Dashboard (requires admin role)
+  get '/dashboard', to: 'dashboard#index', as: 'dashboard'
+
+  # User Dashboard (requires any authenticated user)
+  get '/account', to: 'user_dashboard#index', as: 'account'
+
+  # Set login as homepage
+  root 'sessions#new'
+
+  # API Authentication endpoints (JWT-based, public)
   namespace :auth do
     post 'signup', to: 'authentication#signup'
     post 'login', to: 'authentication#login'
@@ -86,9 +104,6 @@ Rails.application.routes.draw do
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Root path
-  root "health#show"
 
   # Gateway proxy routes (catch-all - must be last!)
   # All requests not matched above will be proxied to backend services

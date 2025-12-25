@@ -29,6 +29,10 @@ gem "jwt", "~> 2.7"
 # HTTP client for proxying requests to backend services
 gem "httparty", "~> 0.21"
 
+# Chartkick for beautiful charts
+gem "chartkick"
+gem "groupdate" # For time-series grouping
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

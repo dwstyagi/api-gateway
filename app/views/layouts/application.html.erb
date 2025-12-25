@@ -19,11 +19,14 @@
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+
+    <%# Chartkick for charts (uses Google Charts) %>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <%= javascript_include_tag "chartkick", "data-turbo-track": "reload" %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
-    </main>
+  <body class="bg-gray-50">
+    <%= yield %>
   </body>
 </html>
