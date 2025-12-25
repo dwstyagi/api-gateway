@@ -21,6 +21,29 @@ Rails.application.routes.draw do
   # User Dashboard (requires any authenticated user)
   get '/account', to: 'user_dashboard#index', as: 'account'
 
+  # Consumer Portal (Developer/API Consumer UI)
+  namespace :consumer, path: 'developer' do
+    # Screen 1: Dashboard - Confidence check
+    get '/', to: 'dashboard#index', as: 'dashboard'
+
+    # Screen 2: API Keys - Self-service key management
+    resources :api_keys do
+      member do
+        post :rotate
+        post :revoke
+      end
+    end
+
+    # Screen 3: Usage - Rate limits and usage stats
+    get 'usage', to: 'usage#index', as: 'usage'
+
+    # Screen 4: Errors - Actionable error logs
+    get 'errors', to: 'errors#index', as: 'errors'
+
+    # Upgrade flow (placeholder)
+    get 'upgrade', to: 'dashboard#upgrade', as: 'upgrade'
+  end
+
   # Set login as homepage
   root 'sessions#new'
 

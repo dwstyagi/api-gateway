@@ -1,4 +1,18 @@
 class ApiKey < ApplicationRecord
+  # Available scopes for API keys
+  AVAILABLE_SCOPES = [
+    'read:all',
+    'write:all',
+    'read:orders',
+    'write:orders',
+    'read:users',
+    'write:users',
+    'read:products',
+    'write:products',
+    'admin:*',
+    '*:*'
+  ].freeze
+
   # Associations
   belongs_to :user
 
@@ -23,9 +37,9 @@ class ApiKey < ApplicationRecord
   attr_accessor :plaintext_key
 
   # Generate a new API key with prefix
-  # Returns the plaintext key (shown only once)
+  # Returns hash with success status, api_key object, and plaintext key (shown only once)
   def self.generate_for_user(user, name:, scopes:, environment: :live)
-    prefix = environment == :test ? "pk_test_" : "pk_live_"
+    prefix = environment.to_s == 'test' ? "pk_test_" : "pk_live_"
     random_part = SecureRandom.hex(16) # 32 characters
     plaintext = "#{prefix}#{random_part}"
 
@@ -38,10 +52,19 @@ class ApiKey < ApplicationRecord
       status: 'active'
     )
 
-    api_key.save!
-
-    # Return the plaintext key - this is the ONLY time it's available
-    plaintext
+    if api_key.save
+      {
+        success: true,
+        api_key: api_key,
+        raw_key: plaintext  # Return the plaintext key - this is the ONLY time it's available
+      }
+    else
+      {
+        success: false,
+        error: api_key.errors.full_messages.join(', '),
+        api_key: api_key
+      }
+    end
   end
 
   # Authenticate with plaintext API key

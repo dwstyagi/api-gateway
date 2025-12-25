@@ -1,0 +1,106 @@
+<%# Consumer API Keys - New Key Form %>
+<%# Purpose: Create new API key with environment and scopes %>
+
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <%= render 'consumer/shared/header', active: 'api_keys' %>
+
+  <%# Main Content %>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <%# Header %>
+    <div class="mb-8">
+      <a href="<%= consumer_api_keys_path %>" class="text-sm text-gray-600 hover:text-gray-900 flex items-center mb-4">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to API Keys
+      </a>
+      <h1 class="text-3xl font-bold text-gray-900">Create New API Key</h1>
+      <p class="text-gray-600 mt-1">Generate a new API key for authentication</p>
+    </div>
+
+    <%# Form Card %>
+    <div class="card bg-white shadow-xl">
+      <div class="card-body">
+        <%= form_with model: @api_key, url: consumer_api_keys_path, class: "space-y-6" do |f| %>
+          <%# Key Name %>
+          <div class="form-control">
+            <%= f.label :name, class: "label" do %>
+              <span class="label-text font-semibold">Key Name *</span>
+            <% end %>
+            <%= f.text_field :name, class: "input input-bordered w-full", placeholder: "Production Key", required: true, autofocus: true %>
+            <label class="label">
+              <span class="label-text-alt text-gray-500">A descriptive name to identify this key's purpose</span>
+            </label>
+          </div>
+
+          <%# Environment %>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Environment *</span>
+            </label>
+            <div class="flex gap-4">
+              <label class="label cursor-pointer border border-gray-300 rounded-lg p-4 flex-1 hover:border-blue-500 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition-all">
+                <%= f.radio_button :environment, 'test', class: "radio radio-primary", checked: true %>
+                <span class="label-text ml-3 flex-1">
+                  <div class="font-semibold">Test</div>
+                  <div class="text-xs text-gray-500">For development and testing</div>
+                </span>
+                <div class="badge badge-info">pk_test_...</div>
+              </label>
+
+              <label class="label cursor-pointer border border-gray-300 rounded-lg p-4 flex-1 hover:border-green-500 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 transition-all">
+                <%= f.radio_button :environment, 'production', class: "radio radio-success" %>
+                <span class="label-text ml-3 flex-1">
+                  <div class="font-semibold">Production</div>
+                  <div class="text-xs text-gray-500">For live applications</div>
+                </span>
+                <div class="badge badge-success">pk_live_...</div>
+              </label>
+            </div>
+          </div>
+
+          <%# Scopes %>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Scopes * <span class="text-xs font-normal text-gray-500">(Select at least one)</span></span>
+            </label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <% @available_scopes.each do |scope| %>
+                <label class="label cursor-pointer border border-gray-200 rounded-lg p-3 hover:border-blue-500 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition-all">
+                  <%= check_box_tag "api_key[scopes][]", scope, false, class: "checkbox checkbox-primary checkbox-sm" %>
+                  <span class="label-text ml-2 flex-1">
+                    <span class="font-mono text-sm"><%= scope %></span>
+                    <div class="text-xs text-gray-500">
+                      <% if scope.include?('read') %>
+                        Read access only
+                      <% elsif scope.include?('write') %>
+                        Write access (can modify data)
+                      <% elsif scope == '*:*' || scope == 'admin:*' %>
+                        Full access to all resources
+                      <% end %>
+                    </div>
+                  </span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+
+          <%# Warning Alert %>
+          <div class="alert alert-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <div>
+              <h3 class="font-bold">API Key will be shown only once!</h3>
+              <div class="text-sm">Make sure to copy it and store it securely. You won't be able to see it again.</div>
+            </div>
+          </div>
+
+          <%# Actions %>
+          <div class="flex items-center justify-end gap-3 pt-4">
+            <a href="<%= consumer_api_keys_path %>" class="btn btn-ghost">Cancel</a>
+            <%= f.submit "Create API Key", class: "btn btn-primary gap-2" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,212 @@
+<%# Consumer Usage - Screen 3: Usage & Rate Limits %>
+<%# Purpose: "Will I get blocked today?" - Panic prevention %>
+
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <%= render 'consumer/shared/header', active: 'usage' %>
+
+  <%# Main Content %>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <%# Header %>
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Usage & Rate Limits</h1>
+      <p class="text-gray-600 mt-1">Monitor your API usage and rate limit status</p>
+    </div>
+
+    <%# Rate Limit Status Card %>
+    <div class="card bg-white shadow-xl mb-8">
+      <div class="card-body">
+        <h2 class="card-title mb-4">Rate Limit Status</h2>
+
+        <%# Visual Progress %>
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-gray-700">Current Usage</span>
+            <span class="text-sm font-medium text-gray-900">
+              <%= @rate_limit_status[:used] %> / <%= @rate_limit_status[:limit] %> requests per hour
+            </span>
+          </div>
+
+          <div class="relative">
+            <progress class="progress <%= @rate_limit_status[:percentage] > 90 ? 'progress-error' : @rate_limit_status[:percentage] > 70 ? 'progress-warning' : 'progress-success' %> w-full h-6" value="<%= @rate_limit_status[:percentage] %>" max="100"></progress>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-xs font-bold <%= @rate_limit_status[:percentage] > 50 ? 'text-white' : 'text-gray-700' %>">
+                <%= @rate_limit_status[:percentage] %>%
+              </span>
+            </div>
+          </div>
+
+          <% if @rate_limit_status[:percentage] > 90 %>
+            <div class="alert alert-error mt-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <span><strong>Warning:</strong> You're approaching your rate limit. Reduce traffic or upgrade your tier to avoid being blocked.</span>
+            </div>
+          <% elsif @rate_limit_status[:percentage] > 70 %>
+            <div class="alert alert-warning mt-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              <span>You've used <%= @rate_limit_status[:percentage] %>% of your rate limit. Consider managing your request frequency.</span>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Info Grid %>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="stat bg-base-200 rounded-lg">
+            <div class="stat-title">Next Reset</div>
+            <div class="stat-value text-2xl">
+              <% if @rate_limit_status[:reset_at] %>
+                <span id="reset-countdown" data-reset="<%= @rate_limit_status[:reset_at].to_i %>">
+                  <%= distance_of_time_in_words(Time.current, @rate_limit_status[:reset_at]) %>
+                </span>
+              <% else %>
+                N/A
+              <% end %>
+            </div>
+            <div class="stat-desc">Time until limit resets</div>
+          </div>
+
+          <div class="stat bg-base-200 rounded-lg">
+            <div class="stat-title">Your Tier</div>
+            <div class="stat-value text-2xl">
+              <span class="badge badge-lg <%= @tier_info[:current] == 'enterprise' ? 'badge-error' : @tier_info[:current] == 'pro' ? 'badge-warning' : 'badge-info' %>">
+                <%= @tier_info[:display_name] %>
+              </span>
+            </div>
+            <div class="stat-desc"><%= number_with_delimiter(@rate_limit_status[:limit]) %> requests/hour</div>
+          </div>
+
+          <div class="stat bg-base-200 rounded-lg">
+            <div class="stat-title">Remaining</div>
+            <div class="stat-value text-2xl <%= @rate_limit_status[:limit] - @rate_limit_status[:used] < 100 ? 'text-error' : 'text-success' %>">
+              <%= number_with_delimiter(@rate_limit_status[:limit] - @rate_limit_status[:used]) %>
+            </div>
+            <div class="stat-desc">Requests available</div>
+          </div>
+        </div>
+
+        <% if @tier_info[:can_upgrade] %>
+          <div class="card-actions justify-end mt-4">
+            <a href="<%= consumer_upgrade_path %>" class="btn btn-primary gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+              Upgrade for Higher Limits
+            </a>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Requests per Minute Chart %>
+    <div class="card bg-white shadow-xl mb-8">
+      <div class="card-body">
+        <h2 class="card-title mb-4">Requests per Minute (Last Hour)</h2>
+
+        <div class="h-64">
+          <%= line_chart @requests_per_minute,
+            colors: ["#3b82f6"],
+            library: {
+              chart: { backgroundColor: 'transparent' },
+              plotOptions: {
+                series: {
+                  animation: { duration: 1000 }
+                }
+              }
+            }
+          %>
+        </div>
+
+        <div class="text-center text-sm text-gray-500 mt-2">
+          Live data refreshes automatically
+        </div>
+      </div>
+    </div>
+
+    <%# Top Endpoints %>
+    <div class="card bg-white shadow-xl">
+      <div class="card-body">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="card-title">Top Endpoints</h2>
+          <span class="badge badge-outline">Last 24 hours</span>
+        </div>
+
+        <% if @top_endpoints.any? %>
+          <div class="space-y-4">
+            <% @top_endpoints.each do |endpoint| %>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-mono text-sm font-semibold"><%= endpoint[:endpoint] %></span>
+                  <span class="text-sm text-gray-600">
+                    <%= number_with_delimiter(endpoint[:count]) %> requests
+                    <span class="text-gray-400">(<%= endpoint[:percentage] %>%)</span>
+                  </span>
+                </div>
+                <div class="relative w-full bg-gray-200 rounded-full h-3">
+                  <div class="absolute top-0 left-0 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
+                       style="width: <%= endpoint[:percentage] %>%">
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-12">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <p class="text-gray-500">No endpoint data available yet</p>
+            <p class="text-sm text-gray-400 mt-1">Make some API requests to see your top endpoints</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Tips Card %>
+    <div class="card bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-xl mt-8">
+      <div class="card-body">
+        <h3 class="card-title">💡 Tips to Optimize Usage</h3>
+        <ul class="list-disc list-inside space-y-2 text-sm opacity-90">
+          <li>Cache API responses when possible to reduce request count</li>
+          <li>Implement request batching for bulk operations</li>
+          <li>Use webhooks instead of polling for real-time updates</li>
+          <li>Monitor your usage patterns and optimize heavy endpoints</li>
+          <% if @tier_info[:can_upgrade] %>
+            <li>Consider upgrading to <%= @tier_info[:current] == 'free' ? 'Pro' : 'Enterprise' %> tier for <%= @tier_info[:current] == 'free' ? '10x' : '100x' %> higher limits</li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-refresh countdown timer
+function updateCountdown() {
+  const countdownEl = document.getElementById('reset-countdown');
+  if (!countdownEl) return;
+
+  const resetTime = parseInt(countdownEl.dataset.reset);
+  const now = Math.floor(Date.now() / 1000);
+  const diff = resetTime - now;
+
+  if (diff <= 0) {
+    countdownEl.textContent = 'Resetting...';
+    setTimeout(() => window.location.reload(), 1000);
+    return;
+  }
+
+  const minutes = Math.floor(diff / 60);
+  const seconds = diff % 60;
+
+  if (minutes > 0) {
+    countdownEl.textContent = `${minutes}m ${seconds}s`;
+  } else {
+    countdownEl.textContent = `${seconds}s`;
+  }
+}
+
+// Update every second
+if (document.getElementById('reset-countdown')) {
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
+}
+</script>

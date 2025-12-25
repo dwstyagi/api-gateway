@@ -1,0 +1,197 @@
+<%# Consumer API Keys - One-Time Key Display %>
+<%# Purpose: Show generated key ONCE with aggressive warning %>
+
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <%= render 'consumer/shared/header', active: 'api_keys' %>
+
+  <%# Main Content %>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <%# Success Header %>
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900">API Key Created Successfully!</h1>
+      <p class="text-gray-600 mt-2">Copy your key now - you won't be able to see it again</p>
+    </div>
+
+    <%# Warning Card %>
+    <div class="alert alert-error shadow-lg mb-6 animate-pulse">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <div>
+        <h3 class="font-bold text-lg">⚠️ This key will only be shown ONCE!</h3>
+        <div class="text-sm">You will NOT be able to see it again after closing this page. Make sure to copy and save it now.</div>
+      </div>
+    </div>
+
+    <%# Key Display Card %>
+    <div class="card bg-white shadow-2xl border-4 border-red-500">
+      <div class="card-body">
+        <h2 class="card-title text-red-600 mb-4">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          Your API Key
+        </h2>
+
+        <%# Key Display with Copy %>
+        <div class="bg-gray-900 rounded-lg p-4 mb-4 relative group">
+          <div class="flex items-center justify-between">
+            <code class="text-green-400 font-mono text-sm break-all select-all" id="api-key-value">
+              <%= @raw_key %>
+            </code>
+            <button onclick="copyToClipboard()" class="btn btn-sm btn-ghost text-white hover:bg-gray-800 ml-4">
+              <svg id="copy-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span id="copy-text">Copy</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center mb-4">
+          <button onclick="copyToClipboard()" class="btn btn-primary btn-lg gap-2" id="main-copy-btn">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Copy to Clipboard
+          </button>
+        </div>
+
+        <%# Key Details %>
+        <div class="grid grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+          <div>
+            <div class="text-xs text-gray-500 font-semibold uppercase">Name</div>
+            <div class="font-semibold"><%= @api_key.name %></div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500 font-semibold uppercase">Environment</div>
+            <div>
+              <span class="badge <%= @api_key.prefix.include?('test') ? 'badge-info' : 'badge-success' %>">
+                <%= @api_key.prefix.include?('test') ? 'Test' : 'Production' %>
+              </span>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500 font-semibold uppercase">Prefix</div>
+            <div class="font-mono text-sm"><%= @api_key.prefix %></div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500 font-semibold uppercase">Scopes</div>
+            <div><%= @api_key.scopes.size %> scope(s)</div>
+          </div>
+        </div>
+
+        <%# Security Checklist %>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <h3 class="font-bold text-yellow-900 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Before You Continue - Security Checklist
+          </h3>
+          <div class="space-y-2 text-sm">
+            <label class="flex items-start cursor-pointer">
+              <input type="checkbox" class="checkbox checkbox-sm checkbox-warning mt-0.5 mr-2" />
+              <span>I have copied and saved this API key in a secure location</span>
+            </label>
+            <label class="flex items-start cursor-pointer">
+              <input type="checkbox" class="checkbox checkbox-sm checkbox-warning mt-0.5 mr-2" />
+              <span>I will store it in environment variables or a secret manager (not in code)</span>
+            </label>
+            <label class="flex items-start cursor-pointer">
+              <input type="checkbox" class="checkbox checkbox-sm checkbox-warning mt-0.5 mr-2" />
+              <span>I will never commit this key to version control</span>
+            </label>
+            <label class="flex items-start cursor-pointer">
+              <input type="checkbox" class="checkbox checkbox-sm checkbox-warning mt-0.5 mr-2" />
+              <span>I understand I won't be able to see this key again</span>
+            </label>
+          </div>
+        </div>
+
+        <%# Action Buttons %>
+        <div class="card-actions justify-between mt-6 pt-4 border-t">
+          <a href="<%= new_consumer_api_key_path %>" class="btn btn-ghost gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Create Another Key
+          </a>
+          <a href="<%= consumer_api_keys_path %>" class="btn btn-success gap-2" id="done-btn">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            I've Saved It - Done
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <%# Example Usage %>
+    <div class="card bg-base-100 shadow-xl mt-6">
+      <div class="card-body">
+        <h3 class="card-title text-sm">Example Usage</h3>
+        <div class="mockup-code text-xs">
+          <pre data-prefix="$"><code>curl https://api.example.com/v1/resource \</code></pre>
+          <pre data-prefix=""><code>  -H "Authorization: Bearer <%= @raw_key %>"</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyToClipboard() {
+  const keyElement = document.getElementById('api-key-value');
+  const textToCopy = keyElement.textContent.trim();
+
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    // Update button text
+    const copyText = document.getElementById('copy-text');
+    const copyIcon = document.getElementById('copy-icon');
+    const mainBtn = document.getElementById('main-copy-btn');
+
+    if (copyText) copyText.textContent = 'Copied!';
+    if (mainBtn) {
+      mainBtn.classList.add('btn-success');
+      mainBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Copied to Clipboard!';
+    }
+
+    // Show success toast
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-top toast-end';
+    toast.innerHTML = '<div class="alert alert-success"><svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span>API key copied to clipboard!</span></div>';
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+    alert('Failed to copy to clipboard. Please copy manually.');
+  });
+}
+
+// Track if user has copied the key
+let hasCopied = false;
+document.getElementById('api-key-value').addEventListener('click', () => {
+  hasCopied = true;
+});
+
+// Warn user if they try to leave without copying
+window.addEventListener('beforeunload', (e) => {
+  if (!hasCopied) {
+    e.preventDefault();
+    e.returnValue = 'Have you copied your API key? You won\'t be able to see it again!';
+    return e.returnValue;
+  }
+});
+
+// Disable warning once done button is clicked
+document.getElementById('done-btn').addEventListener('click', () => {
+  hasCopied = true;
+});
+</script>
