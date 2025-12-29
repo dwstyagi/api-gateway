@@ -44,6 +44,26 @@
       .animate-slide-in-right {
         animation: slideInRight 0.3s ease-in-out;
       }
+
+      /* Force white backgrounds on all form inputs */
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="number"],
+      textarea,
+      select {
+        background-color: white !important;
+        color: #1f2937 !important; /* gray-900 */
+      }
+
+      /* Fix autofill colors */
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:focus,
+      input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+        -webkit-text-fill-color: #1f2937 !important;
+      }
     </style>
   </head>
 

@@ -207,6 +207,24 @@ class MetricsService
       (total_errors.to_f / total_requests * 100).round(2)
     end
 
+    # Get user-specific request count
+    #
+    # @param user_id [Integer] User ID
+    # @param window [Symbol] Time window (unused for now, returns total)
+    # @return [Integer] Number of requests
+    def get_user_requests(user_id, window: :day)
+      get_counter("requests:user:#{user_id}")
+    end
+
+    # Get user-specific error count
+    #
+    # @param user_id [Integer] User ID
+    # @param window [Symbol] Time window (unused for now, returns total)
+    # @return [Integer] Number of errors
+    def get_user_errors(user_id, window: :day)
+      get_counter("errors:user:#{user_id}")
+    end
+
     # Reset all metrics (useful for testing)
     def reset_all!
       keys = $redis.keys('requests:*') +

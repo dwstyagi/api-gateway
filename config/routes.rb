@@ -151,6 +151,6 @@ Rails.application.routes.draw do
   match '/*path', to: 'gateway#proxy', via: :all, constraints: ->(req) {
     # Only proxy if path matches an API definition pattern
     # This prevents proxying static assets and other Rails routes
-    !req.path.start_with?('/health', '/auth', '/admin', '/assets', '/up', '/rails')
+    !req.path.start_with?('/health', '/auth', '/admin', '/assets', '/up', '/rails', '/developer', '/login', '/logout', '/signup', '/dashboard', '/account', '/cable')
   }
 end

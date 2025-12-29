@@ -24,8 +24,9 @@ class SessionsController < ApplicationController
 
       # Log the login
       AuditLog.create(
+        timestamp: Time.current,
         event_type: 'web.login',
-        user_id: user.id,
+        actor_user_id: user.id,
         actor_ip: request.ip,
         metadata: { email: user.email, method: 'password' }
       )
@@ -50,8 +51,9 @@ class SessionsController < ApplicationController
     # Log the logout
     if user_id
       AuditLog.create(
+        timestamp: Time.current,
         event_type: 'web.logout',
-        user_id: user_id,
+        actor_user_id: user_id,
         actor_ip: request.ip,
         metadata: { method: 'manual' }
       )

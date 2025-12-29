@@ -207,7 +207,8 @@ class AuthenticationMiddleware
       '/signup',     # Web signup page
       '/logout',     # Web logout
       '/dashboard',  # Web admin dashboard (has its own auth check)
-      '/account'     # Web user dashboard (has its own auth check)
+      '/account',    # Web user dashboard (has its own auth check)
+      '/developer'   # Consumer/Developer portal (has its own auth check)
     ]
 
     public_routes.any? { |route| path.start_with?(route) }

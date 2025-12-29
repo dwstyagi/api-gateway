@@ -40,7 +40,7 @@ class Consumer::ConsumerController < ApplicationController
 
     key = "rate_limit:user:#{current_user.id}:hour"
     used = $redis.get(key).to_i
-    limit = policy.max_requests
+    limit = policy.capacity
     percentage = limit.zero? ? 0 : ((used.to_f / limit) * 100).round(0)
 
     # Get TTL for reset time
