@@ -1,0 +1,151 @@
+<% content_for :page_title, 'Rate Limit Policies - MOST DANGEROUS' %>
+
+<div class="max-w-7xl mx-auto">
+  <%# DANGER WARNING %>>
+  <div class="alert alert-error mb-8">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-8 w-8" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+    <div>
+      <h3 class="font-bold text-lg">⚠️ MOST DANGEROUS SCREEN ⚠️</h3>
+      <div class="text-sm mt-1">
+        Changing rate limits affects ALL users immediately. Bad configurations can block legitimate traffic or allow abuse.
+      </div>
+    </div>
+  </div>
+
+  <%# Header with Create Button %>>
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Rate Limit Policies</h1>
+      <p class="text-sm text-gray-600 mt-1">Control request rates by tier and API</p>
+    </div>
+    <%= link_to new_admin_rate_limit_policy_path, class: 'btn btn-primary' do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Create Policy
+    <% end %>
+  </div>
+
+  <%# Policies Table %>>
+  <div class="card bg-white shadow-xl">
+    <div class="card-body">
+      <% if @policies.any? %>
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>API</th>
+                <th>Tier</th>
+                <th>Strategy</th>
+                <th>Capacity</th>
+                <th>Rate/Window</th>
+                <th>Failure Mode</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @policies.each do |policy| %>
+                <tr class="hover">
+                  <td class="font-bold text-gray-900">
+                    <%= policy.api_definition&.name || 'All APIs' %>
+                  </td>
+                  <td>
+                    <span class="badge badge-outline">
+                      <%= policy.tier&.upcase || 'ALL' %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge <%= strategy_badge_class(policy.strategy) %>">
+                      <%= policy.strategy.humanize %>
+                    </span>
+                  </td>
+                  <td class="font-mono text-sm">
+                    <%= number_with_delimiter(policy.capacity) %>
+                  </td>
+                  <td class="font-mono text-sm">
+                    <% if policy.refill_rate %>
+                      <%= policy.refill_rate %>/sec
+                    <% elsif policy.window_seconds %>
+                      <%= policy.window_seconds / 60 %>min window
+                    <% else %>
+                      -
+                    <% end %>
+                  </td>
+                  <td>
+                    <span class="badge badge-sm <%= policy.redis_failure_mode == 'allow' ? 'badge-success' : 'badge-error' %>">
+                      <%= policy.redis_failure_mode&.upcase || 'DENY' %>
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex gap-2">
+                      <%# Edit Button %>
+                      <%= link_to edit_admin_rate_limit_policy_path(policy), class: 'btn btn-sm btn-ghost' do %>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      <% end %>
+
+                      <%# Delete Button with Confirmation %>
+                      <%= button_to admin_rate_limit_policy_path(policy),
+                          method: :delete,
+                          class: 'btn btn-sm btn-ghost text-red-600',
+                          data: { turbo_confirm: "Delete policy for #{policy.tier&.upcase || 'ALL'} tier on #{policy.api_definition&.name || 'All APIs'}? This will affect all users in this tier immediately. This action cannot be undone." } do %>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <p class="text-gray-600 text-lg">No rate limit policies configured</p>
+          <p class="text-gray-400 text-sm mt-2">Create your first policy to control API request rates</p>
+          <%= link_to 'Create Policy', new_admin_rate_limit_policy_path, class: 'btn btn-primary mt-4' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Policy Statistics %>>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+    <div class="card bg-white shadow-xl">
+      <div class="card-body">
+        <h3 class="text-sm font-medium text-gray-500">Total Policies</h3>
+        <p class="text-3xl font-bold text-gray-900"><%= @policies.count %></p>
+      </div>
+    </div>
+
+    <div class="card bg-white shadow-xl">
+      <div class="card-body">
+        <h3 class="text-sm font-medium text-gray-500">APIs with Policies</h3>
+        <p class="text-3xl font-bold text-gray-900">
+          <%= @policies.select { |p| p.api_definition_id.present? }.map(&:api_definition_id).uniq.count %>
+        </p>
+      </div>
+    </div>
+
+    <div class="card bg-white shadow-xl">
+      <div class="card-body">
+        <h3 class="text-sm font-medium text-gray-500">Most Common Strategy</h3>
+        <p class="text-xl font-bold text-gray-900">
+          <% strategy_counts = @policies.group_by(&:strategy).transform_values(&:count) %>
+          <% if strategy_counts.any? %>
+            <%= strategy_counts.max_by { |k, v| v }[0].humanize %>
+          <% else %>
+            N/A
+          <% end %>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

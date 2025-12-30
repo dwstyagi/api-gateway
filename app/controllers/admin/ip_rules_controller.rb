@@ -39,16 +39,27 @@ class Admin::IpRulesController < ApplicationController
 
     rules = rules.order(created_at: :desc).limit(per_page).offset(offset)
 
-    render json: {
-      success: true,
-      data: rules.map { |rule| serialize_rule(rule) },
-      pagination: {
-        page: page,
-        per_page: per_page,
-        total: total,
-        total_pages: (total.to_f / per_page).ceil
-      }
-    }
+    respond_to do |format|
+      format.html do
+        # For HTML, separate blocked and allowed IPs
+        @blocked_ips = IpRule.blocked.active.order(created_at: :desc)
+        @allowed_ips = IpRule.allowed.order(created_at: :desc)
+        render :index
+      end
+
+      format.json do
+        render json: {
+          success: true,
+          data: rules.map { |rule| serialize_rule(rule) },
+          pagination: {
+            page: page,
+            per_page: per_page,
+            total: total,
+            total_pages: (total.to_f / per_page).ceil
+          }
+        }
+      end
+    end
   end
 
   # GET /admin/ip_rules/:id
@@ -152,6 +163,18 @@ class Admin::IpRulesController < ApplicationController
 
     log_admin_action('ip_blocked', rule)
 
+    # Broadcast to admin WebSocket channel
+    ActionCable.server.broadcast('admin:metrics', {
+      type: 'ip_blocked',
+      data: {
+        ip_address: ip_address,
+        reason: reason,
+        duration: duration,
+        expires_at: expires_at&.iso8601,
+        timestamp: Time.current.iso8601
+      }
+    })
+
     render json: {
       success: true,
       message: "IP #{ip_address} blocked successfully",
@@ -183,6 +206,15 @@ class Admin::IpRulesController < ApplicationController
     IpRule.where(ip_address: ip_address, rule_type: 'block').destroy_all
 
     log_admin_action('ip_unblocked', { ip_address: ip_address })
+
+    # Broadcast to admin WebSocket channel
+    ActionCable.server.broadcast('admin:metrics', {
+      type: 'ip_unblocked',
+      data: {
+        ip_address: ip_address,
+        timestamp: Time.current.iso8601
+      }
+    })
 
     render json: {
       success: true,

@@ -17,7 +17,7 @@ class Admin::UsersController < ApplicationController
   # GET /admin/users
   # List all users with filtering
   def index
-    users = User.all
+    users = User.includes(:api_keys).all
 
     # Filter by role
     users = users.where(role: params[:role]) if params[:role].present?
@@ -38,16 +38,30 @@ class Admin::UsersController < ApplicationController
 
     users = users.order(created_at: :desc).limit(per_page).offset(offset)
 
-    render json: {
-      success: true,
-      data: users.map { |user| serialize_user(user) },
-      pagination: {
-        page: page,
-        per_page: per_page,
-        total: total,
-        total_pages: (total.to_f / per_page).ceil
-      }
-    }
+    respond_to do |format|
+      format.html do
+        @users = users
+        @stats = {
+          total: total,
+          by_tier: User.group(:tier).count,
+          by_role: User.group(:role).count
+        }
+        render :index
+      end
+
+      format.json do
+        render json: {
+          success: true,
+          data: users.map { |user| serialize_user(user) },
+          pagination: {
+            page: page,
+            per_page: per_page,
+            total: total,
+            total_pages: (total.to_f / per_page).ceil
+          }
+        }
+      end
+    end
   end
 
   # GET /admin/users/:id
@@ -167,28 +181,47 @@ class Admin::UsersController < ApplicationController
   def revoke_tokens
     @user.increment!(:token_version)
 
-    log_admin_action('tokens_revoked', @user)
+    log_admin_action('tokens_revoked', {
+      user_id: @user.id,
+      email: @user.email
+    })
 
-    render json: {
-      success: true,
-      message: 'All tokens revoked successfully. User must re-authenticate.'
-    }
+    respond_to do |format|
+      format.html do
+        redirect_to admin_users_path, notice: "All tokens revoked for #{@user.email}. User must re-authenticate."
+      end
+      format.json do
+        render json: {
+          success: true,
+          message: 'All tokens revoked successfully. User must re-authenticate.'
+        }
+      end
+    end
   end
 
   # POST /admin/users/:id/change_tier
   # Change user's subscription tier
   def change_tier
     @user = User.find(params[:id])
-    new_tier = params[:tier]
+    new_tier = params[:new_tier] || params[:tier]
+    reason = params[:reason]
 
     unless User::TIERS.include?(new_tier)
-      return render json: {
-        success: false,
-        error: {
-          code: 'INVALID_TIER',
-          message: "Invalid tier. Must be one of: #{User::TIERS.join(', ')}"
-        }
-      }, status: :unprocessable_entity
+      respond_to do |format|
+        format.html do
+          redirect_to admin_users_path, alert: "Invalid tier. Must be one of: #{User::TIERS.join(', ')}"
+        end
+        format.json do
+          render json: {
+            success: false,
+            error: {
+              code: 'INVALID_TIER',
+              message: "Invalid tier. Must be one of: #{User::TIERS.join(', ')}"
+            }
+          }, status: :unprocessable_entity
+        end
+      end
+      return
     end
 
     old_tier = @user.tier
@@ -196,15 +229,37 @@ class Admin::UsersController < ApplicationController
 
     log_admin_action('tier_changed', {
       user_id: @user.id,
+      email: @user.email,
       old_tier: old_tier,
-      new_tier: new_tier
+      new_tier: new_tier,
+      reason: reason
     })
 
-    render json: {
-      success: true,
-      message: "User tier changed from #{old_tier} to #{new_tier}",
-      data: serialize_user(@user)
-    }
+    # Broadcast to admin WebSocket channel
+    ActionCable.server.broadcast('admin:metrics', {
+      type: 'tier_changed',
+      data: {
+        user_id: @user.id,
+        user_email: @user.email,
+        old_tier: old_tier,
+        new_tier: new_tier,
+        reason: reason,
+        timestamp: Time.current.iso8601
+      }
+    })
+
+    respond_to do |format|
+      format.html do
+        redirect_to admin_users_path, notice: "User tier changed from #{old_tier} to #{new_tier}"
+      end
+      format.json do
+        render json: {
+          success: true,
+          message: "User tier changed from #{old_tier} to #{new_tier}",
+          data: serialize_user(@user)
+        }
+      end
+    end
   end
 
   # GET /admin/users/stats

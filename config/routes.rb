@@ -62,6 +62,12 @@ Rails.application.routes.draw do
 
   # Admin endpoints (protected by authentication + admin check)
   namespace :admin do
+    # Admin root redirects to overview
+    root 'overview#index'
+
+    # Overview - READ-ONLY system health dashboard
+    resources :overview, only: [:index]
+
     # Users Management
     resources :users do
       collection do
@@ -101,6 +107,7 @@ Rails.application.routes.draw do
       collection do
         get :strategies
         get :stats
+        post :preview
       end
       member do
         post :test

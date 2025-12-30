@@ -66,16 +66,27 @@ class Admin::AuditLogsController < ApplicationController
 
     logs = logs.order(created_at: :desc).limit(per_page).offset(offset)
 
-    render json: {
-      success: true,
-      data: logs.map { |log| serialize_audit_log(log) },
-      pagination: {
-        page: page,
-        per_page: per_page,
-        total: total,
-        total_pages: (total.to_f / per_page).ceil
-      }
-    }
+    respond_to do |format|
+      format.html do
+        @audit_logs = logs
+        @event_types = AuditLog.distinct.pluck(:event_type).sort
+        @categories = @event_types.map { |t| t.split('.').first }.uniq.sort
+        render :index
+      end
+
+      format.json do
+        render json: {
+          success: true,
+          data: logs.map { |log| serialize_audit_log(log) },
+          pagination: {
+            page: page,
+            per_page: per_page,
+            total: total,
+            total_pages: (total.to_f / per_page).ceil
+          }
+        }
+      end
+    end
   end
 
   # GET /admin/audit_logs/:id

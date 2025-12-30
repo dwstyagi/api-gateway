@@ -1,0 +1,236 @@
+<% content_for :page_title, 'Audit Logs - Immutable Record' %>
+
+<div class="max-w-7xl mx-auto">
+  <%# IMMUTABILITY WARNING %>
+  <div class="alert alert-info mb-8">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
+    <div>
+      <h3 class="font-bold">READ-ONLY IMMUTABLE AUDIT TRAIL</h3>
+      <div class="text-sm mt-1">
+        Audit logs cannot be edited or deleted. They exist for forensics, compliance, and accountability.
+        This is your legal shield and proof of what happened.
+      </div>
+    </div>
+  </div>
+
+  <%# Header %>
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Audit Logs</h1>
+      <p class="text-sm text-gray-600 mt-1">Complete history of all admin and security events</p>
+    </div>
+  </div>
+
+  <%# Filters %>
+  <div class="card bg-white shadow-xl mb-6">
+    <div class="card-body">
+      <%= form_with url: admin_audit_logs_path, method: :get, class: 'grid grid-cols-1 md:grid-cols-4 gap-4' do |f| %>
+        <%# Category Filter %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Category</span>
+          </label>
+          <%= select_tag :category,
+              options_for_select([['All Categories', '']] + @categories.map { |c| [c.titleize, c] }, params[:category]),
+              class: 'select select-bordered w-full' %>
+        </div>
+
+        <%# Event Type Filter %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Event Type</span>
+          </label>
+          <%= select_tag :event_type,
+              options_for_select([['All Events', '']] + @event_types.map { |e| [e, e] }, params[:event_type]),
+              class: 'select select-bordered w-full' %>
+        </div>
+
+        <%# Start Date %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Start Date</span>
+          </label>
+          <%= date_field_tag :start_date,
+              params[:start_date],
+              class: 'input input-bordered w-full' %>
+        </div>
+
+        <%# End Date %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">End Date</span>
+          </label>
+          <%= date_field_tag :end_date,
+              params[:end_date],
+              class: 'input input-bordered w-full' %>
+        </div>
+
+        <%# Actions %>
+        <div class="col-span-full flex gap-2">
+          <%= submit_tag 'Apply Filters', class: 'btn btn-primary' %>
+          <%= link_to 'Clear Filters', admin_audit_logs_path, class: 'btn btn-ghost' %>
+          <%= link_to 'Export CSV', admin_audit_logs_export_path(format: :csv, **params.permit(:category, :event_type, :user_id, :start_date, :end_date)),
+              class: 'btn btn-outline',
+              data: { turbo: false } %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Audit Logs Table %>
+  <div class="card bg-white shadow-xl">
+    <div class="card-body">
+      <% if @audit_logs.any? %>
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Event Type</th>
+                <th>Actor</th>
+                <th>IP Address</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @audit_logs.each do |log| %>
+                <tr class="hover">
+                  <td class="font-mono text-sm whitespace-nowrap">
+                    <%= log.created_at.strftime('%Y-%m-%d %H:%M:%S') %>
+                  </td>
+                  <td>
+                    <span class="badge <%= log.event_type.starts_with?('security.') ? 'badge-error' : log.event_type.starts_with?('admin.') ? 'badge-warning' : 'badge-ghost' %>">
+                      <%= log.event_type %>
+                    </span>
+                  </td>
+                  <td class="text-sm">
+                    <%= log.actor&.email || 'System' %>
+                  </td>
+                  <td class="font-mono text-sm">
+                    <%= log.actor_ip || '-' %>
+                  </td>
+                  <td>
+                    <button onclick="showLogDetail(<%= log.id %>, '<%= j log.event_type %>', '<%= j(log.metadata.to_json) %>', '<%= j(log.created_at.iso8601) %>', '<%= j(log.actor&.email || 'System') %>', '<%= j(log.actor_ip || 'N/A') %>')"
+                            class="btn btn-ghost btn-xs">
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <%# Note about immutability %>
+        <div class="alert alert-warning mt-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div class="text-sm">
+            <strong>Enforcement:</strong> Audit logs are write-once, read-many. Model-level callbacks prevent updates and deletes.
+            Export limited to 10,000 rows to prevent memory issues.
+          </div>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p class="text-gray-600 text-lg">No audit logs found</p>
+          <p class="text-gray-400 text-sm mt-2">Try adjusting your filters</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%# LOG DETAIL MODAL %>
+<dialog id="log-detail-modal" class="modal">
+  <div class="modal-box max-w-4xl">
+    <h3 class="font-bold text-lg mb-4">Audit Log Details</h3>
+
+    <div class="space-y-4">
+      <%# Event Type %>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-bold">Event Type</span>
+        </label>
+        <div class="p-3 bg-gray-100 rounded font-mono text-sm" id="detail-event-type"></div>
+      </div>
+
+      <%# Timestamp %>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-bold">Timestamp</span>
+        </label>
+        <div class="p-3 bg-gray-100 rounded font-mono text-sm" id="detail-timestamp"></div>
+      </div>
+
+      <%# Actor %>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">Actor</span>
+          </label>
+          <div class="p-3 bg-gray-100 rounded font-mono text-sm" id="detail-actor"></div>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">IP Address</span>
+          </label>
+          <div class="p-3 bg-gray-100 rounded font-mono text-sm" id="detail-ip"></div>
+        </div>
+      </div>
+
+      <%# Metadata (JSON) %>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-bold">Metadata (JSON)</span>
+        </label>
+        <pre class="p-4 bg-gray-900 text-green-400 rounded font-mono text-xs overflow-x-auto" id="detail-metadata"></pre>
+      </div>
+
+      <%# Immutability Notice %>
+      <div class="alert alert-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-sm">This log entry is <strong>immutable</strong> and cannot be modified or deleted.</span>
+      </div>
+    </div>
+
+    <div class="modal-action">
+      <button class="btn btn-ghost" onclick="document.getElementById('log-detail-modal').close()">
+        Close
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+<%# JAVASCRIPT FOR LOG DETAIL MODAL %>
+<script>
+  function showLogDetail(logId, eventType, metadataJson, timestamp, actor, ip) {
+    // Update modal content
+    document.getElementById('detail-event-type').textContent = eventType;
+    document.getElementById('detail-timestamp').textContent = new Date(timestamp).toLocaleString();
+    document.getElementById('detail-actor').textContent = actor;
+    document.getElementById('detail-ip').textContent = ip;
+
+    // Pretty print JSON
+    try {
+      const metadata = JSON.parse(metadataJson);
+      document.getElementById('detail-metadata').textContent = JSON.stringify(metadata, null, 2);
+    } catch (e) {
+      document.getElementById('detail-metadata').textContent = metadataJson;
+    }
+
+    // Show modal
+    document.getElementById('log-detail-modal').showModal();
+  }
+</script>

@@ -1,0 +1,359 @@
+<% content_for :page_title, 'IP Rules - Emergency Brake' %>
+
+<div class="max-w-7xl mx-auto">
+  <%# EMERGENCY BLOCK IP FORM - Fire Extinguisher Style %>
+  <div class="card bg-red-50 border-2 border-red-600 shadow-xl mb-8">
+    <div class="card-body">
+      <div class="flex items-center mb-4">
+        <svg class="w-8 h-8 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <h2 class="card-title text-2xl text-red-700">EMERGENCY IP BLOCK</h2>
+      </div>
+
+      <%= form_with url: admin_ip_rules_block_path, method: :post, class: 'space-y-4' do |f| %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <%# IP Address Input %>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-bold">IP Address *</span>
+            </label>
+            <%= text_field_tag :ip_address, nil,
+                class: 'input input-bordered input-lg w-full font-mono',
+                placeholder: '192.168.1.100',
+                required: true,
+                pattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$' %>
+            <label class="label">
+              <span class="label-text-alt">Enter IP address to block</span>
+            </label>
+          </div>
+
+          <%# Duration Dropdown %>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-bold">Block Duration *</span>
+            </label>
+            <%= select_tag :duration,
+                options_for_select([
+                  ['1 Hour', 3600],
+                  ['6 Hours', 21600],
+                  ['24 Hours', 86400],
+                  ['7 Days', 604800],
+                  ['Permanent', 'permanent']
+                ], 3600),
+                class: 'select select-bordered select-lg w-full' %>
+          </div>
+        </div>
+
+        <%# Reason Textarea %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">Reason for Block *</span>
+          </label>
+          <%= text_area_tag :reason, nil,
+              class: 'textarea textarea-bordered textarea-lg w-full',
+              placeholder: 'e.g., Suspicious activity, Multiple failed auth attempts, DDoS attack',
+              required: true,
+              rows: 2 %>
+        </div>
+
+        <%# GIANT RED BLOCK BUTTON %>
+        <div class="flex justify-end">
+          <%= button_tag type: 'submit',
+              class: 'btn btn-error btn-lg text-white text-xl font-bold px-12',
+              data: { confirm: 'Are you sure you want to block this IP? This will happen IMMEDIATELY.' } do %>
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+            🔥 BLOCK NOW
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# BLOCKED IPS TABLE %>
+  <div class="card bg-white shadow-xl mb-8">
+    <div class="card-body">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="card-title text-xl">Currently Blocked IPs</h2>
+        <div class="badge badge-error badge-lg">
+          <%= @blocked_ips.count %> Active Blocks
+        </div>
+      </div>
+
+      <% if @blocked_ips.any? %>
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>IP Address</th>
+                <th>Type</th>
+                <th>Reason</th>
+                <th>Expires In</th>
+                <th>Blocked At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @blocked_ips.each do |rule| %>
+                <tr class="hover">
+                  <td class="font-mono font-bold text-red-600"><%= rule.ip_address %></td>
+                  <td><%= auto_manual_badge(rule.auto_blocked) %></td>
+                  <td class="max-w-xs truncate"><%= rule.reason %></td>
+                  <td>
+                    <% if rule.expires_at %>
+                      <span class="countdown-timer font-mono"
+                            data-expires-at="<%= rule.expires_at.iso8601 %>">
+                        <%= countdown_timer(rule.expires_at) %>
+                      </span>
+                    <% else %>
+                      <span class="font-bold">Never</span>
+                    <% end %>
+                  </td>
+                  <td><%= admin_time_ago(rule.created_at) %></td>
+                  <td>
+                    <%= button_to 'Unblock',
+                        admin_ip_rules_unblock_path,
+                        method: :post,
+                        params: { ip_address: rule.ip_address },
+                        class: 'btn btn-sm btn-ghost',
+                        data: { turbo_confirm: "Unblock IP #{rule.ip_address}? This IP will be able to access the gateway immediately." } %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <p class="text-gray-600 text-lg">No IPs currently blocked</p>
+          <p class="text-gray-400 text-sm mt-2">Use the form above to block an IP address</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# VIOLATION STATISTICS %>
+  <div class="card bg-white shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title text-xl mb-4">Check IP Violation Statistics</h2>
+
+      <div class="flex gap-4 mb-6">
+        <div class="form-control flex-1">
+          <input type="text"
+                 id="check-ip-input"
+                 class="input input-bordered input-lg font-mono"
+                 placeholder="Enter IP address (e.g., 192.168.1.100)">
+        </div>
+        <button onclick="checkViolations()"
+                class="btn btn-primary btn-lg">
+          Check Violations
+        </button>
+      </div>
+
+      <div id="violation-stats" class="hidden">
+        <div class="alert alert-info mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>Violation counters for: <strong id="checked-ip" class="font-mono"></strong></span>
+        </div>
+
+        <div class="space-y-4" id="violation-details">
+          <%# Populated by JavaScript %>
+        </div>
+
+        <div class="flex justify-end mt-4">
+          <button onclick="clearViolations()"
+                  class="btn btn-warning">
+            Clear All Violations
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# ALLOWED IPS (if any) %>
+  <% if @allowed_ips.any? %>
+    <div class="card bg-white shadow-xl mt-8">
+      <div class="card-body">
+        <h2 class="card-title text-xl">Allowed IPs (Whitelist)</h2>
+
+        <div class="overflow-x-auto mt-4">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>IP Address</th>
+                <th>Reason</th>
+                <th>Added</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @allowed_ips.each do |rule| %>
+                <tr class="hover">
+                  <td class="font-mono font-bold text-green-600"><%= rule.ip_address %></td>
+                  <td><%= rule.reason %></td>
+                  <td><%= admin_time_ago(rule.created_at) %></td>
+                  <td>
+                    <%= button_to 'Remove',
+                        admin_ip_rule_path(rule),
+                        method: :delete,
+                        class: 'btn btn-sm btn-ghost',
+                        data: { turbo_confirm: "Remove IP #{rule.ip_address} from whitelist?" } %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<%# JAVASCRIPT FOR COUNTDOWN TIMERS AND VIOLATION CHECKS %>
+<script>
+  // Update countdown timers every second
+  function updateCountdownTimers() {
+    document.querySelectorAll('.countdown-timer').forEach(timer => {
+      const expiresAt = new Date(timer.dataset.expiresAt);
+      const now = new Date();
+      const seconds = Math.floor((expiresAt - now) / 1000);
+
+      if (seconds <= 0) {
+        timer.textContent = 'Expired';
+        timer.classList.add('text-red-600', 'font-bold');
+      } else {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        timer.textContent = `${hours}h ${minutes}m ${secs}s`;
+
+        // Turn RED when < 5 minutes remaining
+        if (seconds < 300) {
+          timer.classList.add('text-red-600', 'font-bold');
+        } else {
+          timer.classList.remove('text-red-600', 'font-bold');
+        }
+      }
+    });
+  }
+
+  // Start countdown timer updates
+  setInterval(updateCountdownTimers, 1000);
+
+  // Check violations for an IP
+  function checkViolations() {
+    const ip = document.getElementById('check-ip-input').value.trim();
+
+    if (!ip) {
+      alert('Please enter an IP address');
+      return;
+    }
+
+    fetch(`/admin/ip_rules/violations/${encodeURIComponent(ip)}`, {
+      headers: {
+        'Accept': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('checked-ip').textContent = ip;
+      document.getElementById('violation-stats').classList.remove('hidden');
+
+      const detailsDiv = document.getElementById('violation-details');
+      detailsDiv.innerHTML = '';
+
+      if (data.success && data.data) {
+        // Rate Limit Violations
+        if (data.data.rate_limit_violations !== undefined) {
+          detailsDiv.innerHTML += `
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="font-medium">Rate Limit Violations</span>
+                <span class="font-bold">${data.data.rate_limit_violations.current}/${data.data.rate_limit_violations.threshold}</span>
+              </div>
+              <progress class="progress ${data.data.rate_limit_violations.current >= data.data.rate_limit_violations.threshold * 0.8 ? 'progress-error' : 'progress-warning'} w-full"
+                        value="${data.data.rate_limit_violations.current}"
+                        max="${data.data.rate_limit_violations.threshold}"></progress>
+            </div>
+          `;
+        }
+
+        // Auth Failures
+        if (data.data.auth_failures !== undefined) {
+          detailsDiv.innerHTML += `
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="font-medium">Authentication Failures</span>
+                <span class="font-bold">${data.data.auth_failures.current}/${data.data.auth_failures.threshold}</span>
+              </div>
+              <progress class="progress ${data.data.auth_failures.current >= data.data.auth_failures.threshold * 0.8 ? 'progress-error' : 'progress-warning'} w-full"
+                        value="${data.data.auth_failures.current}"
+                        max="${data.data.auth_failures.threshold}"></progress>
+            </div>
+          `;
+        }
+
+        // Invalid API Keys
+        if (data.data.invalid_api_keys !== undefined) {
+          detailsDiv.innerHTML += `
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="font-medium">Invalid API Key Attempts</span>
+                <span class="font-bold">${data.data.invalid_api_keys.current}/${data.data.invalid_api_keys.threshold}</span>
+              </div>
+              <progress class="progress ${data.data.invalid_api_keys.current >= data.data.invalid_api_keys.threshold * 0.8 ? 'progress-error' : 'progress-warning'} w-full"
+                        value="${data.data.invalid_api_keys.current}"
+                        max="${data.data.invalid_api_keys.threshold}"></progress>
+            </div>
+          `;
+        }
+      } else {
+        detailsDiv.innerHTML = '<p class="text-gray-600">No violations found for this IP</p>';
+      }
+    })
+    .catch(err => {
+      console.error('Error checking violations:', err);
+      alert('Failed to check violations. Please try again.');
+    });
+  }
+
+  // Clear violations for the checked IP
+  function clearViolations() {
+    const ip = document.getElementById('checked-ip').textContent;
+
+    if (!ip || !confirm(`Clear all violation counters for ${ip}?`)) {
+      return;
+    }
+
+    fetch('/admin/ip_rules/clear_violations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ ip_address: ip })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert('Violations cleared successfully');
+        checkViolations(); // Refresh the display
+      } else {
+        alert('Failed to clear violations: ' + (data.error?.message || 'Unknown error'));
+      }
+    })
+    .catch(err => {
+      console.error('Error clearing violations:', err);
+      alert('Failed to clear violations. Please try again.');
+    });
+  }
+</script>

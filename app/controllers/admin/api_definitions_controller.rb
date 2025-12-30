@@ -38,16 +38,25 @@ class Admin::ApiDefinitionsController < ApplicationController
 
     api_defs = api_defs.order(created_at: :desc).limit(per_page).offset(offset)
 
-    render json: {
-      success: true,
-      data: api_defs.map { |api_def| serialize_api_definition(api_def) },
-      pagination: {
-        page: page,
-        per_page: per_page,
-        total: total,
-        total_pages: (total.to_f / per_page).ceil
-      }
-    }
+    respond_to do |format|
+      format.html do
+        @api_definitions = api_defs
+        render :index
+      end
+
+      format.json do
+        render json: {
+          success: true,
+          data: api_defs.map { |api_def| serialize_api_definition(api_def) },
+          pagination: {
+            page: page,
+            per_page: per_page,
+            total: total,
+            total_pages: (total.to_f / per_page).ceil
+          }
+        }
+      end
+    end
   end
 
   # GET /admin/api_definitions/:id
@@ -161,6 +170,18 @@ class Admin::ApiDefinitionsController < ApplicationController
       id: @api_definition.id,
       name: @api_definition.name,
       enabled: @api_definition.enabled
+    })
+
+    # Broadcast to admin WebSocket channel
+    ActionCable.server.broadcast('admin:metrics', {
+      type: @api_definition.enabled ? 'api_enabled' : 'api_disabled',
+      data: {
+        api_name: @api_definition.name,
+        api_id: @api_definition.id,
+        route_pattern: @api_definition.route_pattern,
+        enabled: @api_definition.enabled,
+        timestamp: Time.current.iso8601
+      }
     })
 
     render json: {

@@ -12,7 +12,7 @@
 # All endpoints require admin authentication
 class Admin::RateLimitPoliciesController < ApplicationController
   before_action :require_admin
-  before_action :set_policy, only: [:show, :update, :destroy]
+  before_action :set_policy, only: [:show, :edit, :update, :destroy]
 
   # GET /admin/rate_limit_policies
   # List all rate limit policies
@@ -38,16 +38,39 @@ class Admin::RateLimitPoliciesController < ApplicationController
 
     policies = policies.order(created_at: :desc).limit(per_page).offset(offset)
 
-    render json: {
-      success: true,
-      data: policies.map { |policy| serialize_policy(policy) },
-      pagination: {
-        page: page,
-        per_page: per_page,
-        total: total,
-        total_pages: (total.to_f / per_page).ceil
-      }
-    }
+    respond_to do |format|
+      format.html do
+        @policies = policies
+        @api_definitions = ApiDefinition.all.order(:name)
+        render :index
+      end
+
+      format.json do
+        render json: {
+          success: true,
+          data: policies.map { |policy| serialize_policy(policy) },
+          pagination: {
+            page: page,
+            per_page: per_page,
+            total: total,
+            total_pages: (total.to_f / per_page).ceil
+          }
+        }
+      end
+    end
+  end
+
+  # GET /admin/rate_limit_policies/new
+  # New policy form
+  def new
+    @policy = RateLimitPolicy.new
+    @api_definitions = ApiDefinition.all.order(:name)
+  end
+
+  # GET /admin/rate_limit_policies/:id/edit
+  # Edit policy form
+  def edit
+    @api_definitions = ApiDefinition.all.order(:name)
   end
 
   # GET /admin/rate_limit_policies/:id
@@ -66,6 +89,19 @@ class Admin::RateLimitPoliciesController < ApplicationController
 
     if policy.save
       log_admin_action('rate_limit_policy_created', policy)
+
+      # Broadcast to admin WebSocket channel
+      ActionCable.server.broadcast('admin:metrics', {
+        type: 'policy_created',
+        data: {
+          policy_id: policy.id,
+          api_name: policy.api_definition&.name || 'All APIs',
+          tier: policy.tier,
+          strategy: policy.strategy,
+          capacity: policy.capacity,
+          timestamp: Time.current.iso8601
+        }
+      })
 
       render json: {
         success: true,
@@ -89,6 +125,19 @@ class Admin::RateLimitPoliciesController < ApplicationController
   def update
     if @policy.update(policy_params)
       log_admin_action('rate_limit_policy_updated', @policy)
+
+      # Broadcast to admin WebSocket channel
+      ActionCable.server.broadcast('admin:metrics', {
+        type: 'policy_updated',
+        data: {
+          policy_id: @policy.id,
+          api_name: @policy.api_definition&.name || 'All APIs',
+          tier: @policy.tier,
+          strategy: @policy.strategy,
+          capacity: @policy.capacity,
+          timestamp: Time.current.iso8601
+        }
+      })
 
       render json: {
         success: true,
@@ -231,6 +280,36 @@ class Admin::RateLimitPoliciesController < ApplicationController
     end
   end
 
+  # POST /admin/rate_limit_policies/preview
+  # Preview effective policy and blast radius BEFORE saving
+  def preview
+    policy_data = params[:rate_limit_policy] || params
+
+    strategy = policy_data[:strategy]
+    capacity = policy_data[:capacity]&.to_i
+    refill_rate = policy_data[:refill_rate]&.to_i
+    window_seconds = policy_data[:window_seconds]&.to_i
+    tier = policy_data[:tier]
+    api_definition_id = policy_data[:api_definition_id]
+
+    # Calculate effective policy description
+    effective = calculate_effective_policy(
+      strategy: strategy,
+      capacity: capacity,
+      refill_rate: refill_rate,
+      window_seconds: window_seconds
+    )
+
+    # Calculate blast radius
+    impact = calculate_policy_blast_radius(tier, api_definition_id)
+
+    render json: {
+      success: true,
+      effective: effective,
+      impact: impact
+    }
+  end
+
   private
 
   def set_policy
@@ -307,5 +386,79 @@ class Admin::RateLimitPoliciesController < ApplicationController
       actor_ip: request.ip,
       metadata: details.is_a?(Hash) ? details : { id: details.try(:id) }
     )
+  end
+
+  def calculate_effective_policy(strategy:, capacity:, refill_rate: nil, window_seconds: nil)
+    case strategy
+    when 'token_bucket'
+      requests_per_min = refill_rate ? refill_rate * 60 : 0
+      requests_per_hour = refill_rate ? refill_rate * 3600 : 0
+      {
+        description: "#{capacity} burst capacity, #{refill_rate}/sec sustained (~#{requests_per_min} req/min, ~#{requests_per_hour} req/hour)",
+        allows_bursts: true,
+        sustained_rate: "#{refill_rate}/sec"
+      }
+    when 'fixed_window'
+      window_min = window_seconds ? window_seconds / 60 : 0
+      {
+        description: "#{capacity} requests per #{window_min} minute window (resets at boundary)",
+        allows_bursts: true,
+        sustained_rate: "#{capacity}/#{window_min}min"
+      }
+    when 'sliding_window'
+      window_min = window_seconds ? window_seconds / 60 : 0
+      {
+        description: "#{capacity} requests per #{window_min} minute sliding window (smooth)",
+        allows_bursts: false,
+        sustained_rate: "#{capacity}/#{window_min}min"
+      }
+    when 'leaky_bucket'
+      requests_per_min = refill_rate ? refill_rate * 60 : 0
+      {
+        description: "#{capacity} queue capacity, #{refill_rate}/sec constant processing rate (~#{requests_per_min} req/min)",
+        allows_bursts: false,
+        sustained_rate: "#{refill_rate}/sec"
+      }
+    when 'concurrency'
+      {
+        description: "#{capacity} maximum concurrent requests (not rate-based)",
+        allows_bursts: false,
+        sustained_rate: "N/A (concurrency limit)"
+      }
+    else
+      {
+        description: 'Unknown strategy',
+        allows_bursts: false,
+        sustained_rate: 'N/A'
+      }
+    end
+  end
+
+  def calculate_policy_blast_radius(tier, api_definition_id)
+    # Count affected users by tier
+    if tier.present? && tier != 'all'
+      user_count = User.where(tier: tier).count
+      key_count = ApiKey.active.joins(:user).where(users: { tier: tier }).count
+    else
+      user_count = User.count
+      key_count = ApiKey.active.count
+    end
+
+    # If specific API definition, get request metrics
+    if api_definition_id.present?
+      api_def = ApiDefinition.find_by(id: api_definition_id)
+      metric_key = "api:#{api_definition_id}:requests:hour"
+      hourly_requests = MetricsService.get_counter(metric_key) rescue 0
+    else
+      hourly_requests = 0
+    end
+
+    {
+      affected_users: user_count,
+      active_keys: key_count,
+      requests_per_hour: hourly_requests || 0,
+      tier: tier || 'all',
+      api_name: api_def&.name || 'All APIs'
+    }
   end
 end

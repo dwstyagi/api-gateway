@@ -1,0 +1,205 @@
+<% content_for :page_title, 'System Overview' %>
+
+<div class="max-w-7xl mx-auto">
+  <%# READ-ONLY NOTICE %>
+  <div class="alert alert-info mb-8">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <span><strong>READ-ONLY DASHBOARD</strong> - Situational awareness only. No actions available on this screen.</span>
+  </div>
+
+  <%# 4 SIGNAL CARDS (2x2 Grid) %>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <%# Gateway Status %>
+    <div class="card bg-white shadow-xl">
+      <div class="card-body">
+        <h3 class="text-sm font-medium text-gray-500 mb-2">Gateway Status</h3>
+        <span data-health-gateway class="badge badge-lg <%= @health[:gateway] == 'healthy' ? 'badge-success' : @health[:gateway] == 'warning' ? 'badge-warning' : 'badge-error' %>">
+          <%= @health[:gateway].upcase %>
+        </span>
+
+        <% if @health[:gateway] == 'critical' %>
+          <p class="text-xs text-red-600 mt-2">No requests processed recently</p>
+        <% elsif @health[:gateway] == 'warning' %>
+          <p class="text-xs text-yellow-600 mt-2">Low traffic detected</p>
+        <% else %>
+          <p class="text-xs text-green-600 mt-2">Processing requests</p>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Redis Status %>
+    <div class="card bg-white shadow-xl">
+      <div class="card-body">
+        <h3 class="text-sm font-medium text-gray-500 mb-2">Redis Status</h3>
+        <span data-health-redis class="badge badge-lg <%= @health[:redis] == 'healthy' ? 'badge-success' : 'badge-error' %>">
+          <%= @health[:redis].upcase %>
+        </span>
+
+        <% if @health[:redis] == 'healthy' %>
+          <p class="text-xs text-green-600 mt-2">Connected</p>
+        <% else %>
+          <p class="text-xs text-red-600 mt-2">Connection failed</p>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Error Rate (Last 5 min) %>
+    <div class="card bg-white shadow-xl">
+      <div class="card-body">
+        <h3 class="text-sm font-medium text-gray-500 mb-2">Error Rate (5 min)</h3>
+
+        <div class="flex items-baseline">
+          <% error_rate = @health[:error_rate].to_f %>
+          <span data-health-error-rate class="text-3xl font-bold <%= error_rate > 5 ? 'text-red-600' : error_rate > 1 ? 'text-yellow-600' : 'text-green-600' %>">
+            <%= error_rate.round(1) %>%
+          </span>
+        </div>
+
+        <% if error_rate > 5 %>
+          <div class="flex items-center mt-2 text-red-600">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-xs font-bold">CRITICAL</span>
+          </div>
+        <% elsif error_rate > 1 %>
+          <div class="flex items-center mt-2 text-yellow-600">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-xs font-bold">WARNING</span>
+          </div>
+        <% else %>
+          <p class="text-xs text-green-600 mt-2">Normal</p>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Blocked IPs %>
+    <div class="card bg-white shadow-xl">
+      <div class="card-body">
+        <h3 class="text-sm font-medium text-gray-500 mb-2">Blocked IPs</h3>
+
+        <div class="flex items-baseline">
+          <span data-health-blocked-ips class="text-3xl font-bold <%= @health[:blocked_ips] > 0 ? 'text-red-600' : 'text-green-600' %>">
+            <%= @health[:blocked_ips] %>
+          </span>
+        </div>
+
+        <% if @health[:blocked_ips] > 0 %>
+          <%= link_to admin_ip_rules_path, class: 'text-xs text-red-600 hover:text-red-700 mt-2 inline-flex items-center' do %>
+            View IP Rules
+            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          <% end %>
+        <% else %>
+          <p class="text-xs text-green-600 mt-2">No active blocks</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <%# DATABASE STATUS (Additional Signal) %>
+  <div class="card bg-white shadow-xl mb-8">
+    <div class="card-body">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-medium text-gray-500 mb-2">Database Status</h3>
+          <%= health_status_indicator(@health[:database]) %>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-gray-500">Pool Connections</p>
+          <p class="text-lg font-bold text-gray-900">
+            <%= ActiveRecord::Base.connection_pool.connections.count %> / <%= ActiveRecord::Base.connection_pool.size %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# LAST 10 CRITICAL EVENTS TABLE %>
+  <div class="card bg-white shadow-xl">
+    <div class="card-body">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="card-title text-xl">Last 10 Critical Events</h2>
+        <div class="badge badge-outline">Admin & Security Events Only</div>
+      </div>
+
+      <% if @critical_events.any? %>
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Actor</th>
+                <th>Impact</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @critical_events.each do |event| %>
+                <tr class="hover">
+                  <td class="text-sm whitespace-nowrap">
+                    <%= admin_time_ago(event.created_at) %>
+                  </td>
+                  <td>
+                    <span class="badge <%= event.event_type.starts_with?('security.') ? 'badge-error' : 'badge-warning' %>">
+                      <%= event.event_type %>
+                    </span>
+                  </td>
+                  <td class="text-sm">
+                    <%= event.actor&.email || 'System' %>
+                  </td>
+                  <td class="text-sm text-gray-600">
+                    <% if event.metadata.present? %>
+                      <% if event.metadata['affected_users'] %>
+                        <span class="font-medium"><%= event.metadata['affected_users'] %> users</span>
+                      <% elsif event.metadata['ip_address'] %>
+                        <span class="font-mono"><%= event.metadata['ip_address'] %></span>
+                      <% elsif event.metadata['resource_id'] %>
+                        <span class="font-mono">ID: <%= event.metadata['resource_id'] %></span>
+                      <% else %>
+                        <span>-</span>
+                      <% end %>
+                    <% else %>
+                      <span>-</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 text-center">
+          <%= link_to 'View All Audit Logs →', admin_audit_logs_path, class: 'btn btn-ghost btn-sm' %>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p class="text-gray-600 text-lg">No critical events yet</p>
+          <p class="text-gray-400 text-sm mt-2">Admin and security events will appear here</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# AUTO-REFRESH NOTICE %>
+  <div class="text-center mt-8 text-gray-500 text-sm">
+    <p>Health signals auto-refresh every 10 seconds</p>
+    <p class="text-xs mt-1">Last updated: <span id="last-updated"><%= Time.current.strftime('%H:%M:%S') %></span></p>
+  </div>
+</div>
+
+<%# NO JAVASCRIPT FOR ACTIONS - This is READ-ONLY %>
+<script>
+  // Update last updated timestamp
+  setInterval(() => {
+    document.getElementById('last-updated').textContent = new Date().toLocaleTimeString('en-GB');
+  }, 1000);
+</script>

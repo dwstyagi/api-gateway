@@ -1,0 +1,335 @@
+<% content_for :page_title, "Edit Rate Limit Policy - DANGEROUS" %>
+
+<div class="max-w-4xl mx-auto">
+  <%# EXTREME DANGER WARNING %>
+  <div class="alert alert-error mb-8 border-4 border-red-600">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-10 w-10" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+    <div>
+      <h3 class="font-bold text-xl">⚠️⚠️⚠️ EXTREME DANGER ⚠️⚠️⚠️</h3>
+      <div class="text-sm mt-2">
+        <strong>Changes will apply to ALL users in this tier IMMEDIATELY.</strong>
+        <br>Existing rate limits will be replaced instantly. Users may be locked out or abuse may increase.
+        <br><strong class="text-lg">You MUST preview changes before saving.</strong>
+      </div>
+    </div>
+  </div>
+
+  <%# Header %>
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Edit Rate Limit Policy</h1>
+      <p class="text-sm text-gray-600 mt-1">
+        <%= @policy.api_definition&.name || 'All APIs' %> - <%= @policy.tier&.upcase || 'ALL' %> Tier
+      </p>
+    </div>
+    <%= link_to 'Cancel', admin_rate_limit_policies_path, class: 'btn btn-ghost' %>
+  </div>
+
+  <%# Current Policy Info %>
+  <div class="alert alert-info mb-6">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <div>
+      <h4 class="font-bold">Current Policy:</h4>
+      <p class="text-sm">
+        <strong><%= @policy.strategy.humanize %>:</strong>
+        <%= @policy.capacity %> capacity
+        <% if @policy.refill_rate %>
+          , <%= @policy.refill_rate %>/sec refill rate
+        <% elsif @policy.window_seconds %>
+          , <%= @policy.window_seconds / 60 %> min window
+        <% end %>
+      </p>
+    </div>
+  </div>
+
+  <%# Policy Form %>
+  <div class="card bg-white shadow-xl">
+    <div class="card-body">
+      <%= form_with model: @policy, url: admin_rate_limit_policy_path(@policy), method: :patch, id: 'policy-form', class: 'space-y-6' do |f| %>
+
+        <%# API Definition Selection %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">API Definition *</span>
+          </label>
+          <%= f.select :api_definition_id,
+              options_for_select([['All APIs', '']] + @api_definitions.map { |api| [api.name, api.id] }, @policy.api_definition_id),
+              {},
+              class: 'select select-bordered w-full',
+              required: true %>
+          <label class="label">
+            <span class="label-text-alt">Which API should this policy apply to?</span>
+          </label>
+        </div>
+
+        <%# Tier Selection %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">User Tier *</span>
+          </label>
+          <%= f.select :tier,
+              options_for_select([
+                ['Free Tier', 'free'],
+                ['Pro Tier', 'pro'],
+                ['Enterprise Tier', 'enterprise'],
+                ['All Tiers', 'all']
+              ], @policy.tier),
+              {},
+              class: 'select select-bordered w-full',
+              required: true %>
+          <label class="label">
+            <span class="label-text-alt">Which users will be affected?</span>
+          </label>
+        </div>
+
+        <%# Strategy Selection %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">Rate Limiting Strategy *</span>
+          </label>
+          <%= f.select :strategy,
+              options_for_select([
+                ['Token Bucket (Allows bursts)', 'token_bucket'],
+                ['Fixed Window (Simple)', 'fixed_window'],
+                ['Sliding Window (Smooth)', 'sliding_window'],
+                ['Leaky Bucket (Constant rate)', 'leaky_bucket'],
+                ['Concurrency Limiter', 'concurrency']
+              ], @policy.strategy),
+              {},
+              class: 'select select-bordered w-full',
+              id: 'strategy-select',
+              required: true %>
+          <label class="label">
+            <span class="label-text-alt" id="strategy-description">
+              <%= strategy_description(@policy.strategy) %>
+            </span>
+          </label>
+        </div>
+
+        <%# Capacity - DROPDOWN ONLY %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">Capacity *</span>
+          </label>
+          <%= f.select :capacity,
+              options_for_select([10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000].map { |c| [number_with_delimiter(c), c] }, @policy.capacity),
+              {},
+              class: 'select select-bordered w-full',
+              required: true %>
+          <label class="label">
+            <span class="label-text-alt">Maximum burst or queue size</span>
+          </label>
+        </div>
+
+        <%# Refill Rate - DROPDOWN ONLY (for token_bucket and leaky_bucket) %>
+        <div class="form-control" id="refill-rate-field" style="<%= ['token_bucket', 'leaky_bucket'].include?(@policy.strategy) ? '' : 'display: none;' %>">
+          <label class="label">
+            <span class="label-text font-bold">Refill Rate (requests/sec)</span>
+          </label>
+          <%= f.select :refill_rate,
+              options_for_select([1, 5, 10, 50, 100, 500, 1000].map { |r| [number_with_delimiter(r), r] }, @policy.refill_rate),
+              { include_blank: 'Not applicable' },
+              class: 'select select-bordered w-full' %>
+          <label class="label">
+            <span class="label-text-alt">How fast tokens refill (sustained rate)</span>
+          </label>
+        </div>
+
+        <%# Window Size - DROPDOWN ONLY (for fixed_window and sliding_window) %>
+        <div class="form-control" id="window-seconds-field" style="<%= ['fixed_window', 'sliding_window'].include?(@policy.strategy) ? '' : 'display: none;' %>">
+          <label class="label">
+            <span class="label-text font-bold">Window Size</span>
+          </label>
+          <%= f.select :window_seconds,
+              options_for_select([
+                ['1 minute', 60],
+                ['5 minutes', 300],
+                ['10 minutes', 600],
+                ['30 minutes', 1800],
+                ['1 hour', 3600]
+              ], @policy.window_seconds),
+              { include_blank: 'Not applicable' },
+              class: 'select select-bordered w-full' %>
+          <label class="label">
+            <span class="label-text-alt">Time window for request counting</span>
+          </label>
+        </div>
+
+        <%# Redis Failure Mode %>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">Redis Failure Mode *</span>
+          </label>
+          <%= f.select :redis_failure_mode,
+              options_for_select([
+                ['Deny (Safer - block requests)', 'deny'],
+                ['Allow (Riskier - allow requests)', 'allow']
+              ], @policy.redis_failure_mode || 'deny'),
+              {},
+              class: 'select select-bordered w-full',
+              required: true %>
+          <label class="label">
+            <span class="label-text-alt">What happens if Redis is down?</span>
+          </label>
+        </div>
+
+        <%# PREVIEW SECTION (initially hidden) %>
+        <div id="policy-preview" class="alert alert-info" style="display: none;">
+          <div class="w-full">
+            <h4 class="font-bold text-lg mb-3">📊 EFFECTIVE POLICY PREVIEW</h4>
+
+            <div class="bg-white p-4 rounded-lg mb-3">
+              <h5 class="font-bold mb-2">What this will change to:</h5>
+              <p id="preview-description" class="text-gray-900"></p>
+              <p class="text-sm mt-2">
+                <strong>Allows bursts:</strong> <span id="preview-bursts"></span>
+              </p>
+              <p class="text-sm">
+                <strong>Sustained rate:</strong> <span id="preview-rate"></span>
+              </p>
+            </div>
+
+            <div class="bg-red-100 p-4 rounded-lg border-2 border-red-600">
+              <h5 class="font-bold text-red-900 mb-2">BLAST RADIUS:</h5>
+              <ul class="list-disc ml-6 space-y-1 text-red-900">
+                <li><strong id="blast-users"></strong> users will be affected IMMEDIATELY</li>
+                <li><strong id="blast-keys"></strong> active API keys will experience changes</li>
+                <li>Applies to: <strong id="blast-api"></strong></li>
+                <li>Tier: <strong id="blast-tier"></strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <%# Action Buttons %>
+        <div class="flex justify-between items-center pt-4 border-t">
+          <button type="button" id="preview-btn" class="btn btn-primary btn-lg">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Preview Changes
+          </button>
+
+          <%= f.submit 'Save Changes',
+              id: 'save-btn',
+              class: 'btn btn-success btn-lg',
+              disabled: true,
+              data: { confirm: 'Are you sure? These changes will apply to all users in the selected tier IMMEDIATELY. Make sure you reviewed the preview.' } %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%# JAVASCRIPT FOR DYNAMIC FORM AND PREVIEW - Same as new.html.erb %>
+<script>
+  // Strategy descriptions
+  const strategyDescriptions = {
+    token_bucket: 'Allows burst traffic. Tokens are added at a constant rate, consumed on requests. Good for APIs that need to allow bursts while maintaining average rate.',
+    fixed_window: 'Simple counter reset at fixed intervals. Easy to understand, but can have burst at window boundaries.',
+    sliding_window: 'Smooths out burst at window boundaries using weighted average. More accurate than fixed window.',
+    leaky_bucket: 'Processes requests at constant rate, queue overflow is dropped. Smooth traffic flow to backend.',
+    concurrency: 'Limits concurrent requests, not rate. Good for protecting backends from too many simultaneous connections.'
+  };
+
+  // Show/hide fields based on strategy
+  document.getElementById('strategy-select')?.addEventListener('change', (e) => {
+    const strategy = e.target.value;
+    const refillField = document.getElementById('refill-rate-field');
+    const windowField = document.getElementById('window-seconds-field');
+    const descriptionEl = document.getElementById('strategy-description');
+
+    // Update description
+    descriptionEl.textContent = strategyDescriptions[strategy] || 'Select a strategy to see description';
+
+    // Show/hide fields based on strategy
+    if (strategy === 'token_bucket' || strategy === 'leaky_bucket') {
+      refillField.style.display = 'block';
+      windowField.style.display = 'none';
+    } else if (strategy === 'fixed_window' || strategy === 'sliding_window') {
+      refillField.style.display = 'none';
+      windowField.style.display = 'block';
+    } else {
+      refillField.style.display = 'none';
+      windowField.style.display = 'none';
+    }
+
+    // Reset save button
+    document.getElementById('save-btn').disabled = true;
+    document.getElementById('policy-preview').style.display = 'none';
+  });
+
+  // Preview button handler
+  document.getElementById('preview-btn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    const form = document.getElementById('policy-form');
+    const formData = new FormData(form);
+
+    const data = {
+      rate_limit_policy: {
+        api_definition_id: formData.get('rate_limit_policy[api_definition_id]'),
+        tier: formData.get('rate_limit_policy[tier]'),
+        strategy: formData.get('rate_limit_policy[strategy]'),
+        capacity: formData.get('rate_limit_policy[capacity]'),
+        refill_rate: formData.get('rate_limit_policy[refill_rate]'),
+        window_seconds: formData.get('rate_limit_policy[window_seconds]')
+      }
+    };
+
+    try {
+      const response = await fetch('/admin/rate_limit_policies/preview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update preview section
+        document.getElementById('preview-description').textContent = result.effective.description;
+        document.getElementById('preview-bursts').textContent = result.effective.allows_bursts ? 'Yes' : 'No';
+        document.getElementById('preview-rate').textContent = result.effective.sustained_rate;
+
+        document.getElementById('blast-users').textContent = result.impact.affected_users;
+        document.getElementById('blast-keys').textContent = result.impact.active_keys;
+        document.getElementById('blast-api').textContent = result.impact.api_name;
+        document.getElementById('blast-tier').textContent = result.impact.tier.toUpperCase();
+
+        // Show preview section
+        document.getElementById('policy-preview').style.display = 'block';
+
+        // Enable save button
+        document.getElementById('save-btn').disabled = false;
+
+        // Scroll to preview
+        document.getElementById('policy-preview').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        alert('Failed to preview policy. Please check your inputs.');
+      }
+    } catch (error) {
+      console.error('Preview error:', error);
+      alert('Failed to preview policy. Please try again.');
+    }
+  });
+
+  // Disable save button if form changes after preview
+  document.querySelectorAll('#policy-form select').forEach(select => {
+    select.addEventListener('change', () => {
+      if (document.getElementById('policy-preview').style.display === 'block') {
+        document.getElementById('save-btn').disabled = true;
+        document.getElementById('policy-preview').style.display = 'none';
+        alert('Form changed. Please preview again before saving.');
+      }
+    });
+  });
+</script>
