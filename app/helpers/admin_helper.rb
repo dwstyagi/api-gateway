@@ -203,21 +203,21 @@ module AdminHelper
   # Render tier badge
   def tier_badge(tier)
     colors = {
-      'free' => 'badge-ghost',
-      'pro' => 'badge-info',
-      'enterprise' => 'badge-success'
+      'free' => 'bg-gray-100 text-gray-700',
+      'pro' => 'bg-blue-100 text-blue-700',
+      'enterprise' => 'bg-green-100 text-green-700'
     }
 
-    badge_class = colors[tier.to_s.downcase] || 'badge-ghost'
+    color_class = colors[tier.to_s.downcase] || 'bg-gray-100 text-gray-700'
 
-    content_tag :span, tier.titleize, class: "badge #{badge_class} badge-sm"
+    content_tag :span, tier.titleize, class: "inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold #{color_class}"
   end
 
   # Render role badge
   def role_badge(role)
-    badge_class = role.to_s == 'admin' ? 'badge-error' : 'badge-ghost'
+    color_class = role.to_s == 'admin' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
 
-    content_tag :span, role.titleize, class: "badge #{badge_class} badge-sm"
+    content_tag :span, role.titleize, class: "inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold #{color_class}"
   end
 
   # Check if current page matches any of the given paths

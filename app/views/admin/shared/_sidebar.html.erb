@@ -1,90 +1,122 @@
-<div class="w-64 bg-gray-800 text-white min-h-screen flex flex-col">
+<div class="w-64 bg-gradient-to-b from-indigo-600 via-purple-600 to-pink-600 text-white min-h-screen flex flex-col shadow-2xl">
   <%# Logo/Title %>
-  <div class="p-4 border-b border-gray-700">
-    <h2 class="text-xl font-bold">Admin Console</h2>
-    <p class="text-xs text-gray-400 mt-1">Safety Control Panel</p>
+  <div class="p-6 border-b border-white/20">
+    <div class="flex items-center space-x-3">
+      <div class="bg-white/20 backdrop-blur-sm rounded-xl p-2">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold">Gateway</h2>
+        <p class="text-xs text-white/70 mt-0.5">Control Center</p>
+      </div>
+    </div>
   </div>
 
   <%# Navigation %>
   <nav class="flex-1 p-4">
-    <ul class="space-y-2">
+    <ul class="space-y-1.5">
       <%# Overview %>
       <li>
-        <%= link_to admin_overview_index_path, class: "flex items-center p-3 rounded hover:bg-gray-700 transition-colors #{current_page?(admin_overview_index_path) || current_page?(admin_root_path) ? 'bg-gray-700' : ''}" do %>
-          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          <span class="font-medium">Overview</span>
+        <%= link_to admin_overview_index_path, class: "group flex items-center p-3.5 rounded-xl transition-all duration-200 smooth-hover #{current_page?(admin_overview_index_path) || current_page?(admin_root_path) ? 'bg-white/25 backdrop-blur-sm shadow-lg' : 'hover:bg-white/10'}" do %>
+          <div class="bg-white/10 p-2 rounded-lg mr-3 group-hover:bg-white/20 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </div>
+          <span class="font-semibold text-sm">Overview</span>
         <% end %>
       </li>
 
       <%# APIs %>
       <li>
-        <%= link_to admin_api_definitions_path, class: "flex items-center p-3 rounded hover:bg-gray-700 transition-colors #{current_page?(admin_api_definitions_path) ? 'bg-gray-700' : ''}" do %>
-          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <span class="font-medium">APIs</span>
+        <%= link_to admin_api_definitions_path, class: "group flex items-center p-3.5 rounded-xl transition-all duration-200 smooth-hover #{current_page?(admin_api_definitions_path) ? 'bg-white/25 backdrop-blur-sm shadow-lg' : 'hover:bg-white/10'}" do %>
+          <div class="bg-white/10 p-2 rounded-lg mr-3 group-hover:bg-white/20 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <span class="font-semibold text-sm">APIs</span>
         <% end %>
       </li>
 
       <%# Policies - MOST DANGEROUS %>
       <li>
-        <%= link_to admin_rate_limit_policies_path, class: "flex items-center p-3 rounded hover:bg-gray-700 transition-colors #{current_page?(admin_rate_limit_policies_path) ? 'bg-gray-700' : ''}" do %>
-          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-          <span class="font-medium">Policies</span>
-          <span class="badge badge-error badge-sm ml-auto">⚠️</span>
+        <%= link_to admin_rate_limit_policies_path, class: "group flex items-center p-3.5 rounded-xl transition-all duration-200 smooth-hover #{current_page?(admin_rate_limit_policies_path) ? 'bg-white/25 backdrop-blur-sm shadow-lg' : 'hover:bg-white/10'}" do %>
+          <div class="bg-white/10 p-2 rounded-lg mr-3 group-hover:bg-white/20 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <span class="font-semibold text-sm">Policies</span>
+          <span class="ml-auto bg-red-500/80 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold shadow-lg">⚠️</span>
         <% end %>
       </li>
 
       <%# Users %>
       <li>
-        <%= link_to admin_users_path, class: "flex items-center p-3 rounded hover:bg-gray-700 transition-colors #{current_page?(admin_users_path) ? 'bg-gray-700' : ''}" do %>
-          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-          <span class="font-medium">Users</span>
+        <%= link_to admin_users_path, class: "group flex items-center p-3.5 rounded-xl transition-all duration-200 smooth-hover #{current_page?(admin_users_path) ? 'bg-white/25 backdrop-blur-sm shadow-lg' : 'hover:bg-white/10'}" do %>
+          <div class="bg-white/10 p-2 rounded-lg mr-3 group-hover:bg-white/20 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </div>
+          <span class="font-semibold text-sm">Users</span>
         <% end %>
       </li>
 
       <%# IP Rules - Emergency Brake %>
       <li>
-        <%= link_to admin_ip_rules_path, class: "flex items-center p-3 rounded hover:bg-gray-700 transition-colors #{current_page?(admin_ip_rules_path) ? 'bg-gray-700' : ''}" do %>
-          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-          </svg>
-          <span class="font-medium">IP Rules</span>
+        <%= link_to admin_ip_rules_path, class: "group flex items-center p-3.5 rounded-xl transition-all duration-200 smooth-hover #{current_page?(admin_ip_rules_path) ? 'bg-white/25 backdrop-blur-sm shadow-lg' : 'hover:bg-white/10'}" do %>
+          <div class="bg-white/10 p-2 rounded-lg mr-3 group-hover:bg-white/20 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+          </div>
+          <span class="font-semibold text-sm">IP Rules</span>
           <% blocked_count = IpRule.blocked.active.count %>
           <% if blocked_count > 0 %>
-            <span class="badge badge-error badge-sm ml-auto"><%= blocked_count %></span>
+            <span class="ml-auto bg-red-500/80 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold shadow-lg"><%= blocked_count %></span>
           <% end %>
         <% end %>
       </li>
 
       <%# Audit Logs %>
       <li>
-        <%= link_to admin_audit_logs_path, class: "flex items-center p-3 rounded hover:bg-gray-700 transition-colors #{current_page?(admin_audit_logs_path) ? 'bg-gray-700' : ''}" do %>
-          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span class="font-medium">Audit Logs</span>
+        <%= link_to admin_audit_logs_path, class: "group flex items-center p-3.5 rounded-xl transition-all duration-200 smooth-hover #{current_page?(admin_audit_logs_path) ? 'bg-white/25 backdrop-blur-sm shadow-lg' : 'hover:bg-white/10'}" do %>
+          <div class="bg-white/10 p-2 rounded-lg mr-3 group-hover:bg-white/20 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <span class="font-semibold text-sm">Audit Logs</span>
         <% end %>
       </li>
     </ul>
   </nav>
 
   <%# Footer %>
-  <div class="p-4 border-t border-gray-700">
-    <div class="text-xs text-gray-400 mb-2">
-      <p class="font-medium mb-1">Admin:</p>
-      <p class="truncate"><%= current_user.email %></p>
-    </div>
-    <div class="text-xs text-gray-500">
-      <p>Role: <%= current_user.role.titleize %></p>
+  <div class="p-4 border-t border-white/20 bg-black/10">
+    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+      <div class="flex items-center space-x-3 mb-3">
+        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-pink-500 text-white font-bold text-sm shadow-lg">
+          <%= current_user.email[0].upcase %>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm truncate"><%= current_user.email.split('@').first.titleize %></p>
+          <p class="text-xs text-white/70 truncate"><%= current_user.email %></p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between text-xs">
+        <span class="text-white/70">Role:</span>
+        <span class="font-semibold bg-white/10 px-2 py-1 rounded-lg"><%= current_user.role.titleize %></span>
+      </div>
       <% if current_user.tier %>
-        <p>Tier: <%= current_user.tier.titleize %></p>
+        <div class="flex items-center justify-between text-xs mt-2">
+          <span class="text-white/70">Tier:</span>
+          <span class="font-semibold bg-white/10 px-2 py-1 rounded-lg"><%= current_user.tier.titleize %></span>
+        </div>
       <% end %>
     </div>
   </div>

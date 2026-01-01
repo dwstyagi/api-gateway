@@ -1,15 +1,22 @@
-<% content_for :page_title, 'IP Rules - Emergency Brake' %>
+<% content_for :page_title, 'IP Rules' %>
 
 <div class="max-w-7xl mx-auto">
-  <%# EMERGENCY BLOCK IP FORM - Fire Extinguisher Style %>
-  <div class="card bg-red-50 border-2 border-red-600 shadow-xl mb-8">
-    <div class="card-body">
-      <div class="flex items-center mb-4">
-        <svg class="w-8 h-8 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <h2 class="card-title text-2xl text-red-700">EMERGENCY IP BLOCK</h2>
+  <%# EMERGENCY BLOCK IP FORM - Modern Gradient Style %>
+  <div class="glass-card rounded-2xl shadow-2xl mb-8 border-2 border-red-300 smooth-hover overflow-hidden">
+    <div class="bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 p-6">
+      <div class="flex items-center">
+        <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-3 mr-4">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-white">EMERGENCY IP BLOCK</h2>
+          <p class="text-white/80 text-sm mt-1">Immediately block suspicious IP addresses</p>
+        </div>
       </div>
+    </div>
+    <div class="p-6">
 
       <%= form_with url: block_admin_ip_rules_path, method: :post, class: 'space-y-4' do |f| %>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -57,30 +64,39 @@
               rows: 2 %>
         </div>
 
-        <%# GIANT RED BLOCK BUTTON %>
+        <%# BLOCK BUTTON - Modern Gradient Style %>
         <div class="flex justify-end">
           <%= button_tag type: 'submit',
-              class: 'btn btn-error btn-lg text-white text-xl font-bold px-12',
+              class: 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white text-lg font-bold px-10 py-4 rounded-xl shadow-lg transition-all duration-300 smooth-hover flex items-center space-x-2',
               data: { confirm: 'Are you sure you want to block this IP? This will happen IMMEDIATELY.' } do %>
-            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
             </svg>
-            🔥 BLOCK NOW
+            <span>🔥 BLOCK NOW</span>
           <% end %>
         </div>
       <% end %>
     </div>
   </div>
 
-  <%# BLOCKED IPS TABLE %>
-  <div class="card bg-white shadow-xl mb-8">
-    <div class="card-body">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="card-title text-xl">Currently Blocked IPs</h2>
-        <div class="badge badge-error badge-lg">
-          <%= @blocked_ips.count %> Active Blocks
+  <%# BLOCKED IPS TABLE - Modern Glass Card %>
+  <div class="glass-card rounded-2xl shadow-2xl mb-8 smooth-hover overflow-hidden">
+    <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="bg-white/20 backdrop-blur-sm rounded-xl p-2">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-white">Currently Blocked IPs</h2>
+        </div>
+        <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/30">
+          <span class="text-white font-bold text-lg"><%= @blocked_ips.count %> Active Blocks</span>
         </div>
       </div>
+    </div>
+    <div class="p-6">
 
       <% if @blocked_ips.any? %>
         <div class="overflow-x-auto">
@@ -137,10 +153,19 @@
     </div>
   </div>
 
-  <%# VIOLATION STATISTICS %>
-  <div class="card bg-white shadow-xl">
-    <div class="card-body">
-      <h2 class="card-title text-xl mb-4">Check IP Violation Statistics</h2>
+  <%# VIOLATION STATISTICS - Modern Glass Card %>
+  <div class="glass-card rounded-2xl shadow-2xl smooth-hover overflow-hidden">
+    <div class="bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 p-6">
+      <div class="flex items-center space-x-3">
+        <div class="bg-white/20 backdrop-blur-sm rounded-xl p-2">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-white">Check IP Violation Statistics</h2>
+      </div>
+    </div>
+    <div class="p-6">
 
       <div class="flex gap-4 mb-6">
         <div class="form-control flex-1">
@@ -150,7 +175,7 @@
                  placeholder="Enter IP address (e.g., 192.168.1.100)">
         </div>
         <button onclick="checkViolations()"
-                class="btn btn-primary btn-lg">
+                class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition-all duration-300 smooth-hover">
           Check Violations
         </button>
       </div>
@@ -169,7 +194,7 @@
 
         <div class="flex justify-end mt-4">
           <button onclick="clearViolations()"
-                  class="btn btn-warning">
+                  class="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all duration-300 smooth-hover">
             Clear All Violations
           </button>
         </div>
@@ -177,11 +202,20 @@
     </div>
   </div>
 
-  <%# ALLOWED IPS (if any) %>
+  <%# ALLOWED IPS (if any) - Modern Glass Card %>
   <% if @allowed_ips.any? %>
-    <div class="card bg-white shadow-xl mt-8">
-      <div class="card-body">
-        <h2 class="card-title text-xl">Allowed IPs (Whitelist)</h2>
+    <div class="glass-card rounded-2xl shadow-2xl mt-8 smooth-hover overflow-hidden">
+      <div class="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 p-6">
+        <div class="flex items-center space-x-3">
+          <div class="bg-white/20 backdrop-blur-sm rounded-xl p-2">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-white">Allowed IPs (Whitelist)</h2>
+        </div>
+      </div>
+      <div class="p-6">
 
         <div class="overflow-x-auto mt-4">
           <table class="table table-zebra">

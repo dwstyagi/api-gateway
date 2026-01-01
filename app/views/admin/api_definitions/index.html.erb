@@ -1,101 +1,156 @@
-<% content_for :page_title, 'API Definitions - Routing Control' %>
+<% content_for :page_title, 'API Definitions' %>
 
 <div class="max-w-7xl mx-auto">
   <%# Header with Create Button %>
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">API Definitions</h1>
-      <p class="text-sm text-gray-600 mt-1">Manage backend service routing</p>
+  <div class="glass-card rounded-2xl shadow-xl mb-6 p-6 smooth-hover">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl p-3">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">API Definitions</h1>
+          <p class="text-sm text-gray-600 mt-1">Manage backend service routing</p>
+        </div>
+      </div>
+      <%= link_to new_admin_api_definition_path, class: 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all duration-300 smooth-hover flex items-center space-x-2' do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        <span>Create API</span>
+      <% end %>
     </div>
-    <%= link_to new_admin_api_definition_path, class: 'btn btn-primary' do %>
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-      Create API
-    <% end %>
   </div>
 
   <%# API Definitions Table %>
-  <div class="card bg-white shadow-xl">
-    <div class="card-body">
+  <div class="glass-card rounded-2xl shadow-2xl smooth-hover overflow-hidden">
+    <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="bg-white/20 backdrop-blur-sm rounded-xl p-2">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-white">API Routes</h2>
+        </div>
+        <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/30">
+          <span class="text-white font-bold text-lg"><%= @api_definitions.count %> Routes</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6">
       <% if @api_definitions.any? %>
-        <div class="overflow-x-auto">
-          <table class="table table-zebra">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Route Pattern</th>
-                <th>Backend URL</th>
-                <th>Methods</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% @api_definitions.each do |api| %>
-                <tr class="hover">
-                  <td class="font-bold text-gray-900"><%= api.name %></td>
-                  <td class="font-mono text-sm"><%= api.route_pattern %></td>
-                  <td class="font-mono text-sm text-blue-600 truncate max-w-xs">
+        <div class="space-y-3">
+          <% @api_definitions.each do |api| %>
+            <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 smooth-hover">
+              <div class="grid grid-cols-12 gap-4 items-center">
+                <%# Name Column %>
+                <div class="col-span-2">
+                  <div class="font-bold text-gray-900 text-lg"><%= api.name %></div>
+                </div>
+
+                <%# Route Pattern Column %>
+                <div class="col-span-2">
+                  <div class="font-mono text-sm bg-gray-100 px-3 py-1.5 rounded-lg text-gray-700">
+                    <%= api.route_pattern %>
+                  </div>
+                </div>
+
+                <%# Backend URL Column %>
+                <div class="col-span-3">
+                  <div class="font-mono text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg truncate">
                     <%= api.backend_url %>
-                  </td>
-                  <td>
-                    <div class="flex gap-1">
-                      <% api.allowed_methods.each do |method| %>
-                        <span class="badge badge-sm badge-outline"><%= method %></span>
-                      <% end %>
-                    </div>
-                  </td>
-                  <td>
-                    <%= status_badge(api.enabled ? 'enabled' : 'disabled') %>
-                  </td>
-                  <td>
-                    <div class="flex gap-2">
-                      <%# Toggle Enable/Disable - WITH CONFIRMATION %>
-                      <% if api.enabled %>
-                        <button onclick="showDisableConfirmation('<%= api.id %>', '<%= api.name %>')"
-                                class="btn btn-sm btn-error">
-                          Disable
-                        </button>
-                      <% else %>
-                        <%= button_to 'Enable',
-                            admin_api_definition_toggle_path(api),
-                            method: :post,
-                            class: 'btn btn-sm btn-success',
-                            data: { turbo_confirm: "Enable API '#{api.name}'? Traffic will start routing immediately." } %>
-                      <% end %>
+                  </div>
+                </div>
 
-                      <%# Edit Button %>
-                      <%= link_to edit_admin_api_definition_path(api), class: 'btn btn-sm btn-ghost' do %>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      <% end %>
+                <%# Methods Column %>
+                <div class="col-span-2">
+                  <div class="flex gap-1 flex-nowrap">
+                    <% api.allowed_methods.each do |method| %>
+                      <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold whitespace-nowrap <%= case method
+                        when 'GET' then 'bg-green-100 text-green-700'
+                        when 'POST' then 'bg-blue-100 text-blue-700'
+                        when 'PUT' then 'bg-yellow-100 text-yellow-700'
+                        when 'DELETE' then 'bg-red-100 text-red-700'
+                        else 'bg-gray-100 text-gray-700'
+                      end %>">
+                        <%= method %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
 
-                      <%# Delete Button %>
-                      <%= button_to admin_api_definition_path(api),
-                          method: :delete,
-                          class: 'btn btn-sm btn-ghost text-red-600',
-                          data: { turbo_confirm: "Delete API '#{api.name}'? This will remove all associated rate limit policies. This action cannot be undone." } do %>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      <% end %>
-                    </div>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
+                <%# Status Column %>
+                <div class="col-span-1">
+                  <% if api.enabled %>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-green-100 text-green-700">
+                      Enabled
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-700">
+                      Disabled
+                    </span>
+                  <% end %>
+                </div>
+
+                <%# Actions Column %>
+                <div class="col-span-2">
+                  <div class="flex gap-2 justify-end">
+                    <%# Toggle Enable/Disable %>
+                    <% if api.enabled %>
+                      <button onclick="showDisableConfirmation('<%= api.id %>', '<%= api.name %>')"
+                              class="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition-all duration-300 text-sm">
+                        Disable
+                      </button>
+                    <% else %>
+                      <%= button_to 'Enable',
+                          admin_api_definition_toggle_path(api),
+                          method: :post,
+                          class: 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition-all duration-300 text-sm',
+                          data: { turbo_confirm: "Enable API '#{api.name}'? Traffic will start routing immediately." } %>
+                    <% end %>
+
+                    <%# Edit Button %>
+                    <%= link_to edit_admin_api_definition_path(api), class: 'bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all duration-300' do %>
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    <% end %>
+
+                    <%# Delete Button %>
+                    <%= button_to admin_api_definition_path(api),
+                        method: :delete,
+                        class: 'bg-red-100 hover:bg-red-200 text-red-600 p-2 rounded-lg transition-all duration-300',
+                        data: { turbo_confirm: "Delete API '#{api.name}'? This will remove all associated rate limit policies. This action cannot be undone." } do %>
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
         </div>
       <% else %>
-        <div class="text-center py-12">
-          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <p class="text-gray-600 text-lg">No API definitions yet</p>
-          <p class="text-gray-400 text-sm mt-2">Create your first API definition to start routing traffic</p>
-          <%= link_to 'Create API Definition', new_admin_api_definition_path, class: 'btn btn-primary mt-4' %>
+        <div class="text-center py-16">
+          <div class="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <p class="text-gray-700 text-xl font-semibold">No API definitions yet</p>
+          <p class="text-gray-500 text-sm mt-2 mb-6">Create your first API definition to start routing traffic</p>
+          <%= link_to new_admin_api_definition_path, class: 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition-all duration-300 smooth-hover inline-flex items-center space-x-2' do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <span>Create API Definition</span>
+          <% end %>
         </div>
       <% end %>
     </div>
@@ -104,50 +159,71 @@
 
 <%# DISABLE CONFIRMATION MODAL WITH BLAST RADIUS %>
 <dialog id="disable-api-modal" class="modal">
-  <div class="modal-box max-w-2xl">
-    <h3 class="font-bold text-lg text-red-700 mb-4">
-      ⚠️ Disable API: <span id="api-name-display"></span>?
+  <div class="modal-box max-w-2xl glass-card">
+    <h3 class="font-bold text-2xl text-red-700 mb-4 flex items-center">
+      <svg class="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      Disable API: <span id="api-name-display"></span>?
     </h3>
 
-    <%# Blast Radius Preview (populated by JavaScript) %>
-    <div class="alert alert-error mb-4">
+    <%# Blast Radius Preview %>
+    <div class="bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-xl p-4 mb-4">
       <div>
-        <h4 class="font-bold text-lg mb-2">BLAST RADIUS:</h4>
-        <ul class="list-disc ml-6 space-y-1" id="blast-radius-list">
-          <li id="blast-users">Calculating...</li>
-          <li id="blast-keys">Calculating...</li>
-          <li id="blast-requests">Calculating...</li>
+        <h4 class="font-bold text-lg mb-3 text-red-800">BLAST RADIUS:</h4>
+        <ul class="space-y-2" id="blast-radius-list">
+          <li id="blast-users" class="flex items-center text-red-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            Calculating...
+          </li>
+          <li id="blast-keys" class="flex items-center text-red-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            Calculating...
+          </li>
+          <li id="blast-requests" class="flex items-center text-red-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Calculating...
+          </li>
         </ul>
       </div>
     </div>
 
-    <div class="alert alert-warning mb-4">
-      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      <span><strong>This will happen IMMEDIATELY.</strong></span>
+    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-xl p-4 mb-4">
+      <div class="flex items-center">
+        <svg class="w-6 h-6 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span class="text-yellow-800 font-semibold"><strong>This will happen IMMEDIATELY.</strong></span>
+      </div>
     </div>
 
     <%# Type to Confirm %>
     <div class="form-control mb-4">
       <label class="label">
-        <span class="label-text font-bold">Type API name "<span id="api-name-confirm"></span>" to confirm:</span>
+        <span class="label-text font-bold text-gray-700">Type API name "<span id="api-name-confirm" class="text-red-600"></span>" to confirm:</span>
       </label>
       <input type="text"
              id="confirm-api-name-input"
-             class="input input-bordered"
+             class="input input-bordered input-lg"
              placeholder="Type API name here">
     </div>
 
     <div class="modal-action">
-      <button class="btn btn-ghost" onclick="document.getElementById('disable-api-modal').close()">
+      <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-3 rounded-xl transition-all duration-300"
+              onclick="document.getElementById('disable-api-modal').close()">
         Cancel
       </button>
       <%= button_to 'Confirm Disable',
           '#',
           method: :post,
           id: 'confirm-disable-btn',
-          class: 'btn btn-error',
+          class: 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed',
           disabled: true,
           data: { api_id: '' } %>
     </div>
@@ -175,14 +251,11 @@
     // Show modal
     document.getElementById('disable-api-modal').showModal();
 
-    // Calculate blast radius (mocked for now - would call backend endpoint)
+    // Calculate blast radius
     calculateBlastRadius(apiId);
   }
 
   function calculateBlastRadius(apiId) {
-    // For now, use mock data
-    // In production, this would be: fetch(`/admin/api_definitions/${apiId}/blast_radius`)
-
     // Mock calculation
     setTimeout(() => {
       const mockData = {
@@ -191,12 +264,24 @@
         requests_per_hour: Math.floor(Math.random() * 5000) + 100
       };
 
-      document.getElementById('blast-users').innerHTML =
-        `<strong>${mockData.affected_users}</strong> users will be affected`;
-      document.getElementById('blast-keys').innerHTML =
-        `<strong>${mockData.active_keys}</strong> active API keys will fail`;
-      document.getElementById('blast-requests').innerHTML =
-        `<strong>${mockData.requests_per_hour}</strong> requests/hour will be blocked`;
+      document.getElementById('blast-users').innerHTML = `
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <strong>${mockData.affected_users}</strong> users will be affected
+      `;
+      document.getElementById('blast-keys').innerHTML = `
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+        </svg>
+        <strong>${mockData.active_keys}</strong> active API keys will fail
+      `;
+      document.getElementById('blast-requests').innerHTML = `
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <strong>${mockData.requests_per_hour}</strong> requests/hour will be blocked
+      `;
     }, 500);
   }
 
@@ -208,8 +293,6 @@
     if (typedName === currentApiName) {
       confirmBtn.disabled = false;
       confirmBtn.dataset.apiId = currentApiId;
-
-      // Update form action
       confirmBtn.form.action = `/admin/api_definitions/${currentApiId}/toggle`;
     } else {
       confirmBtn.disabled = true;
@@ -218,7 +301,6 @@
 
   // Handle successful disable
   document.getElementById('confirm-disable-btn')?.addEventListener('click', () => {
-    // Form will submit, modal will close on turbo response
     setTimeout(() => {
       document.getElementById('disable-api-modal').close();
     }, 100);

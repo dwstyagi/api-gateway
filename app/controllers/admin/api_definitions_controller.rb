@@ -11,7 +11,7 @@
 #
 # All endpoints require admin authentication
 class Admin::ApiDefinitionsController < AdminController
-  before_action :set_api_definition, only: [:show, :update, :destroy, :toggle]
+  before_action :set_api_definition, only: [:show, :edit, :update, :destroy, :toggle]
 
   # GET /admin/api_definitions
   # List all API definitions
@@ -83,6 +83,12 @@ class Admin::ApiDefinitionsController < AdminController
     }
   end
 
+  # GET /admin/api_definitions/new
+  # Render form for creating a new API definition
+  def new
+    @api_definition = ApiDefinition.new
+  end
+
   # POST /admin/api_definitions
   # Create a new API definition
   def create
@@ -91,21 +97,43 @@ class Admin::ApiDefinitionsController < AdminController
     if api_def.save
       log_admin_action('api_definition_created', api_def)
 
-      render json: {
-        success: true,
-        message: 'API definition created successfully',
-        data: serialize_api_definition(api_def)
-      }, status: :created
+      respond_to do |format|
+        format.html do
+          redirect_to admin_api_definitions_path, notice: "API definition '#{api_def.name}' created successfully"
+        end
+        format.json do
+          render json: {
+            success: true,
+            message: 'API definition created successfully',
+            data: serialize_api_definition(api_def)
+          }, status: :created
+        end
+      end
     else
-      render json: {
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Failed to create API definition',
-          details: api_def.errors.full_messages
-        }
-      }, status: :unprocessable_entity
+      respond_to do |format|
+        format.html do
+          @api_definition = api_def
+          flash.now[:alert] = "Failed to create API definition: #{api_def.errors.full_messages.join(', ')}"
+          render :new, status: :unprocessable_entity
+        end
+        format.json do
+          render json: {
+            success: false,
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Failed to create API definition',
+              details: api_def.errors.full_messages
+            }
+          }, status: :unprocessable_entity
+        end
+      end
     end
+  end
+
+  # GET /admin/api_definitions/:id/edit
+  # Render form for editing an API definition
+  def edit
+    # @api_definition is set by before_action
   end
 
   # PATCH/PUT /admin/api_definitions/:id
@@ -114,20 +142,35 @@ class Admin::ApiDefinitionsController < AdminController
     if @api_definition.update(api_definition_params)
       log_admin_action('api_definition_updated', @api_definition)
 
-      render json: {
-        success: true,
-        message: 'API definition updated successfully',
-        data: serialize_api_definition(@api_definition)
-      }
+      respond_to do |format|
+        format.html do
+          redirect_to admin_api_definitions_path, notice: "API definition '#{@api_definition.name}' updated successfully"
+        end
+        format.json do
+          render json: {
+            success: true,
+            message: 'API definition updated successfully',
+            data: serialize_api_definition(@api_definition)
+          }
+        end
+      end
     else
-      render json: {
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Failed to update API definition',
-          details: @api_definition.errors.full_messages
-        }
-      }, status: :unprocessable_entity
+      respond_to do |format|
+        format.html do
+          flash.now[:alert] = "Failed to update API definition: #{@api_definition.errors.full_messages.join(', ')}"
+          render :edit, status: :unprocessable_entity
+        end
+        format.json do
+          render json: {
+            success: false,
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Failed to update API definition',
+              details: @api_definition.errors.full_messages
+            }
+          }, status: :unprocessable_entity
+        end
+      end
     end
   end
 
