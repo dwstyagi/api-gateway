@@ -9,7 +9,7 @@ class SessionsController < ApplicationController
 
   def new
     # Show login page
-    redirect_to dashboard_path if current_user && current_user.admin?
+    redirect_to admin_root_path if current_user && current_user.admin?
     redirect_to consumer_dashboard_path if current_user && !current_user.admin?
   end
 
@@ -33,7 +33,7 @@ class SessionsController < ApplicationController
 
       # Redirect based on role
       if user.admin?
-        redirect_to dashboard_path, notice: 'Welcome back, Admin!'
+        redirect_to admin_root_path, notice: 'Welcome to Admin Safety Console'
       else
         redirect_to consumer_dashboard_path, notice: 'Welcome to your Developer Portal!'
       end

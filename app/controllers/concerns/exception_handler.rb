@@ -24,7 +24,15 @@ module ExceptionHandler
       response.headers['Retry-After'] = exception.details[:retry_after_seconds].to_i.to_s if exception.details[:retry_after_seconds]
     end
 
-    render json: exception.to_response, status: exception.status
+    respond_to do |format|
+      format.html do
+        flash[:alert] = exception.message
+        redirect_to login_path
+      end
+      format.json do
+        render json: exception.to_response, status: exception.status
+      end
+    end
   end
 
   def handle_standard_error(exception)
@@ -34,12 +42,20 @@ module ExceptionHandler
     # Don't expose internal errors to clients in production
     message = Rails.env.production? ? "An internal error occurred" : exception.message
 
-    render json: {
-      success: false,
-      error: {
-        code: "INTERNAL_ERROR",
-        message: message
-      }
-    }, status: :internal_server_error
+    respond_to do |format|
+      format.html do
+        flash[:alert] = "An error occurred: #{message}"
+        redirect_to root_path
+      end
+      format.json do
+        render json: {
+          success: false,
+          error: {
+            code: "INTERNAL_ERROR",
+            message: message
+          }
+        }, status: :internal_server_error
+      end
+    end
   end
 end

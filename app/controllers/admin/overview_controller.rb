@@ -11,8 +11,7 @@
 # - Blocked IPs
 #
 # Plus last 10 critical events (admin.* and security.* types)
-class Admin::OverviewController < ApplicationController
-  before_action :require_admin
+class Admin::OverviewController < AdminController
 
   def index
     @health = {
@@ -28,6 +27,27 @@ class Admin::OverviewController < ApplicationController
                        .order(created_at: :desc)
                        .limit(10)
                        .includes(:actor)
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          success: true,
+          health: @health,
+          critical_events: @critical_events.map { |event| serialize_event(event) }
+        }
+      end
+    end
+  end
+
+  def serialize_event(event)
+    {
+      id: event.id,
+      timestamp: event.timestamp,
+      event_type: event.event_type,
+      actor: event.actor&.email,
+      metadata: event.metadata
+    }
   end
 
   private

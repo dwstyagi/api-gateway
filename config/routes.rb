@@ -15,8 +15,8 @@ Rails.application.routes.draw do
   get '/signup', to: 'registrations#new', as: 'signup'
   post '/signup', to: 'registrations#create'
 
-  # Admin Dashboard (requires admin role)
-  get '/dashboard', to: 'dashboard#index', as: 'dashboard'
+  # Old Admin Dashboard - redirect to new Admin UI
+  get '/dashboard', to: redirect('/admin'), as: 'dashboard'
 
   # User Dashboard (requires any authenticated user)
   get '/account', to: 'user_dashboard#index', as: 'account'
@@ -61,7 +61,7 @@ Rails.application.routes.draw do
   end
 
   # Admin endpoints (protected by authentication + admin check)
-  namespace :admin do
+  namespace :admin, defaults: { format: :html } do
     # Admin root redirects to overview
     root 'overview#index'
 

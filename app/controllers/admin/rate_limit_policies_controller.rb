@@ -10,8 +10,7 @@
 # - Test policy configuration
 #
 # All endpoints require admin authentication
-class Admin::RateLimitPoliciesController < ApplicationController
-  before_action :require_admin
+class Admin::RateLimitPoliciesController < AdminController
   before_action :set_policy, only: [:show, :edit, :update, :destroy]
 
   # GET /admin/rate_limit_policies
@@ -334,22 +333,6 @@ class Admin::RateLimitPoliciesController < ApplicationController
       :window_seconds,
       :redis_failure_mode
     )
-  end
-
-  def current_user
-    request.env['current_user']
-  end
-
-  def require_admin
-    unless current_user&.admin?
-      render json: {
-        success: false,
-        error: {
-          code: 'FORBIDDEN',
-          message: 'Admin access required'
-        }
-      }, status: :forbidden
-    end
   end
 
   def serialize_policy(policy, detailed: false)

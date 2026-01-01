@@ -11,7 +11,7 @@
         <h2 class="card-title text-2xl text-red-700">EMERGENCY IP BLOCK</h2>
       </div>
 
-      <%= form_with url: admin_ip_rules_block_path, method: :post, class: 'space-y-4' do |f| %>
+      <%= form_with url: block_admin_ip_rules_path, method: :post, class: 'space-y-4' do |f| %>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <%# IP Address Input %>
           <div class="form-control">
@@ -114,7 +114,7 @@
                   <td><%= admin_time_ago(rule.created_at) %></td>
                   <td>
                     <%= button_to 'Unblock',
-                        admin_ip_rules_unblock_path,
+                        unblock_admin_ip_rules_path,
                         method: :post,
                         params: { ip_address: rule.ip_address },
                         class: 'btn btn-sm btn-ghost',

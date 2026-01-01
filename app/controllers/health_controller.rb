@@ -57,7 +57,7 @@ class HealthController < ApplicationController
     render json: {
       status: all_healthy ? 'healthy' : 'degraded',
       timestamp: Time.current.iso8601,
-      version: Rails.application.config.version || '1.0.0',
+      version: '1.0.0',
       environment: Rails.env,
       checks: checks,
       metrics: metrics,

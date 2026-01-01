@@ -9,8 +9,7 @@
 # - Force rotate API keys
 #
 # All endpoints require admin authentication
-class Admin::ApiKeysController < ApplicationController
-  before_action :require_admin
+class Admin::ApiKeysController < AdminController
   before_action :set_api_key, only: [:show, :destroy, :revoke]
 
   # GET /admin/api_keys
@@ -212,22 +211,6 @@ class Admin::ApiKeysController < ApplicationController
       requests_today: 0,
       requests_this_week: 0
     }
-  end
-
-  def current_user
-    request.env['current_user']
-  end
-
-  def require_admin
-    unless current_user&.admin?
-      render json: {
-        success: false,
-        error: {
-          code: 'FORBIDDEN',
-          message: 'Admin access required'
-        }
-      }, status: :forbidden
-    end
   end
 
   def serialize_api_key(key)

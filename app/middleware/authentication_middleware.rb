@@ -199,7 +199,7 @@ class AuthenticationMiddleware
     return true if path == '/'
 
     public_routes = [
-      '/health',
+      '/health',     # Health check endpoints (includes /health/detailed)
       '/auth/login',
       '/auth/signup',
       '/auth/refresh',
@@ -207,6 +207,7 @@ class AuthenticationMiddleware
       '/signup',     # Web signup page
       '/logout',     # Web logout
       '/dashboard',  # Web admin dashboard (has its own auth check)
+      '/admin',      # Admin Safety Console (has its own auth check via require_admin)
       '/account',    # Web user dashboard (has its own auth check)
       '/developer'   # Consumer/Developer portal (has its own auth check)
     ]

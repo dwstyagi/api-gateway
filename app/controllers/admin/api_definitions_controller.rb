@@ -10,8 +10,7 @@
 # - Delete API definitions
 #
 # All endpoints require admin authentication
-class Admin::ApiDefinitionsController < ApplicationController
-  before_action :require_admin
+class Admin::ApiDefinitionsController < AdminController
   before_action :set_api_definition, only: [:show, :update, :destroy, :toggle]
 
   # GET /admin/api_definitions
@@ -273,22 +272,6 @@ class Admin::ApiDefinitionsController < ApplicationController
       :enabled,
       allowed_methods: []
     )
-  end
-
-  def current_user
-    request.env['current_user']
-  end
-
-  def require_admin
-    unless current_user&.admin?
-      render json: {
-        success: false,
-        error: {
-          code: 'FORBIDDEN',
-          message: 'Admin access required'
-        }
-      }, status: :forbidden
-    end
   end
 
   def serialize_api_definition(api_def)

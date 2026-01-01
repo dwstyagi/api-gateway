@@ -71,7 +71,7 @@
         <div class="col-span-full flex gap-2">
           <%= submit_tag 'Apply Filters', class: 'btn btn-primary' %>
           <%= link_to 'Clear Filters', admin_audit_logs_path, class: 'btn btn-ghost' %>
-          <%= link_to 'Export CSV', admin_audit_logs_export_path(format: :csv, **params.permit(:category, :event_type, :user_id, :start_date, :end_date)),
+          <%= link_to 'Export CSV', export_admin_audit_logs_path(format: :csv, **params.permit(:category, :event_type, :user_id, :start_date, :end_date)),
               class: 'btn btn-outline',
               data: { turbo: false } %>
         </div>

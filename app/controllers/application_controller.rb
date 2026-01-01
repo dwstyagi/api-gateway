@@ -10,13 +10,17 @@ class ApplicationController < ActionController::Base
   private
 
   def current_user
+    return @current_user if defined?(@current_user) && @current_user.present?
+
     # Check session first (for web UI)
     if session[:user_id]
-      @current_user ||= User.find_by(id: session[:user_id])
+      @current_user = User.find_by(id: session[:user_id])
+      return @current_user if @current_user
     end
 
     # Fall back to middleware-set user (for API requests)
-    @current_user ||= request.env['current_user']
+    @current_user = request.env['current_user']
+    @current_user
   end
 
   def require_admin
@@ -29,7 +33,9 @@ class ApplicationController < ActionController::Base
             error: { code: 'FORBIDDEN', message: 'Admin access required' }
           }, status: :forbidden
         end
+        format.any { redirect_to login_path, alert: 'Admin access required' }
       end
+      return false
     end
   end
 

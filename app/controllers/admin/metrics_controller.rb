@@ -5,8 +5,7 @@ module Admin
   #
   # Provides access to system metrics and observability data
   # Requires admin authentication
-  class MetricsController < ApplicationController
-    before_action :require_admin
+  class MetricsController < AdminController
 
     # GET /admin/metrics
     # Get comprehensive system metrics

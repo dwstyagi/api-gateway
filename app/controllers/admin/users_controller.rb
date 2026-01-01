@@ -10,8 +10,7 @@
 # - Force token revocation
 #
 # All endpoints require admin authentication
-class Admin::UsersController < ApplicationController
-  before_action :require_admin
+class Admin::UsersController < AdminController
   before_action :set_user, only: [:show, :update, :destroy, :revoke_tokens]
 
   # GET /admin/users
@@ -305,22 +304,6 @@ class Admin::UsersController < ApplicationController
 
   def user_update_params
     params.require(:user).permit(:email, :role, :tier)
-  end
-
-  def current_user
-    request.env['current_user']
-  end
-
-  def require_admin
-    unless current_user&.admin?
-      render json: {
-        success: false,
-        error: {
-          code: 'FORBIDDEN',
-          message: 'Admin access required'
-        }
-      }, status: :forbidden
-    end
   end
 
   def serialize_user(user)

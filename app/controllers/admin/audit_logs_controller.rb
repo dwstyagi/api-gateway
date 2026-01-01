@@ -9,8 +9,7 @@
 # - Search audit logs
 #
 # All endpoints require admin authentication
-class Admin::AuditLogsController < ApplicationController
-  before_action :require_admin
+class Admin::AuditLogsController < AdminController
   before_action :set_audit_log, only: [:show]
 
   # GET /admin/audit_logs
@@ -243,22 +242,6 @@ class Admin::AuditLogsController < ApplicationController
         message: 'Audit log not found'
       }
     }, status: :not_found
-  end
-
-  def current_user
-    request.env['current_user']
-  end
-
-  def require_admin
-    unless current_user&.admin?
-      render json: {
-        success: false,
-        error: {
-          code: 'FORBIDDEN',
-          message: 'Admin access required'
-        }
-      }, status: :forbidden
-    end
   end
 
   def serialize_audit_log(log, detailed: false)

@@ -9,8 +9,7 @@
 # - View violation statistics
 #
 # All endpoints require admin authentication
-class Admin::IpRulesController < ApplicationController
-  before_action :require_admin
+class Admin::IpRulesController < AdminController
   before_action :set_ip_rule, only: [:show, :update, :destroy]
 
   # GET /admin/ip_rules
@@ -357,20 +356,6 @@ class Admin::IpRulesController < ApplicationController
       :reason,
       :expires_at
     )
-  end
-
-  def require_admin
-    current_user = request.env['current_user']
-
-    unless current_user&.admin?
-      render json: {
-        success: false,
-        error: {
-          code: 'FORBIDDEN',
-          message: 'Admin access required'
-        }
-      }, status: :forbidden
-    end
   end
 
   def valid_ip?(ip)
