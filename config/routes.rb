@@ -18,13 +18,14 @@ Rails.application.routes.draw do
   # Old Admin Dashboard - redirect to new Admin UI
   get '/dashboard', to: redirect('/admin'), as: 'dashboard'
 
-  # User Dashboard (requires any authenticated user)
-  get '/account', to: 'user_dashboard#index', as: 'account'
-
   # Consumer Portal (Developer/API Consumer UI)
   namespace :consumer, path: 'developer' do
     # Screen 1: Dashboard - Confidence check
     get '/', to: 'dashboard#index', as: 'dashboard'
+    
+    # Settings - Profile management
+    get 'settings', to: 'settings#index', as: 'settings'
+    patch 'settings', to: 'settings#update'
 
     # Screen 2: API Keys - Self-service key management
     resources :api_keys do

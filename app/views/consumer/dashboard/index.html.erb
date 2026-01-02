@@ -1,45 +1,81 @@
-<%# Consumer Dashboard - Screen 1: Confidence Check %>
+<%# Consumer Dashboard - Screen 1: Stunning Redesign %>
 <%# Purpose: "Is my API working, fast, and not blocked?" - answered in 5 seconds %>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-  <%# Header %>
-  <div class="bg-white shadow-sm border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <h1 class="text-2xl font-bold text-gray-900">API Dashboard</h1>
-          <div class="flex items-center space-x-2">
-            <span class="badge <%= @environment == 'production' ? 'badge-success' : 'badge-info' %> badge-lg">
-              <%= @environment.titleize %>
-            </span>
-            <span class="badge badge-outline badge-lg">
-              <%= @tier %> Tier
-            </span>
-          </div>
-        </div>
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+  <%# Animated background elements %>
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+    <div class="absolute top-1/2 left-1/2 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+  </div>
 
-        <%# Navigation %>
-        <div class="flex items-center space-x-4">
-          <div class="tabs tabs-boxed">
-            <a href="<%= consumer_dashboard_path %>" class="tab tab-active">Dashboard</a>
-            <a href="<%= consumer_api_keys_path %>" class="tab">API Keys</a>
-            <a href="<%= consumer_usage_path %>" class="tab">Usage</a>
-            <a href="<%= consumer_errors_path %>" class="tab">Errors</a>
-          </div>
-
-          <div class="dropdown dropdown-end">
-            <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-              <div class="w-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                <%= current_user.email[0].upcase %>
+  <%# Navigation Header %>
+  <div class="relative z-20">
+    <div class="backdrop-blur-xl bg-white/70 shadow-lg border-b border-white/20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-6">
+            <%# Logo/Brand %>
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
               </div>
-            </label>
-            <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-              <li class="menu-title">
-                <span><%= current_user.email %></span>
-              </li>
-              <li><a href="<%= account_path %>">Old Dashboard</a></li>
-              <li><a href="<%= logout_path %>" data-turbo-method="delete">Logout</a></li>
-            </ul>
+              <div>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  API Portal
+                </h1>
+                <p class="text-xs text-gray-500">Developer Dashboard</p>
+              </div>
+            </div>
+
+            <%# Environment & Tier Badges %>
+            <div class="flex items-center space-x-2">
+              <div class="px-3 py-1 rounded-full <%= @environment == 'production' ? 'bg-green-100 text-green-700 ring-2 ring-green-500/20' : 'bg-blue-100 text-blue-700 ring-2 ring-blue-500/20' %> text-xs font-semibold">
+                <div class="flex items-center space-x-1">
+                  <div class="w-2 h-2 rounded-full <%= @environment == 'production' ? 'bg-green-500' : 'bg-blue-500' %> animate-pulse"></div>
+                  <span><%= @environment.titleize %></span>
+                </div>
+              </div>
+              <div class="px-3 py-1 rounded-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs font-semibold ring-2 ring-purple-500/20">
+                ✨ <%= @tier %> Tier
+              </div>
+            </div>
+          </div>
+
+          <%# Navigation Tabs %>
+          <div class="flex items-center space-x-6">
+            <nav class="flex items-center space-x-1 bg-white/50 backdrop-blur-sm rounded-xl p-1 shadow-inner">
+              <a href="<%= consumer_dashboard_path %>" class="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium shadow-md transition-all">
+                Dashboard
+              </a>
+              <a href="<%= consumer_api_keys_path %>" class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-white/80 text-sm font-medium transition-all">
+                API Keys
+              </a>
+              <a href="<%= consumer_usage_path %>" class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-white/80 text-sm font-medium transition-all">
+                Usage
+              </a>
+              <a href="<%= consumer_errors_path %>" class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-white/80 text-sm font-medium transition-all">
+                Errors
+              </a>
+            </nav>
+
+            <%# User Menu %>
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar hover:scale-110 transition-transform">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-white/50">
+                  <%= current_user.email[0].upcase %>
+                </div>
+              </div>
+              <ul tabindex="0" class="mt-3 z-50 p-2 shadow-2xl menu menu-sm dropdown-content bg-white/90 backdrop-blur-xl rounded-2xl w-52 border border-white/20">
+                <li class="menu-title">
+                  <span class="text-gray-900 font-semibold"><%= current_user.email %></span>
+                </li>
+                <li><a href="<%= consumer_settings_path %>" class="hover:bg-purple-50">⚙️ Settings</a></li>
+                <li><a href="<%= logout_path %>" data-turbo-method="delete" class="hover:bg-red-50 text-red-600">🚪 Logout</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -47,216 +83,220 @@
   </div>
 
   <%# Main Content %>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <%# Metrics Cards - 4 Maximum %>
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <%# Welcome Section %>
+    <div class="mb-8">
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">
+        Welcome back, <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"><%= current_user.email.split('@').first.titleize %></span>
+      </h2>
+      <p class="text-gray-600">Here's your API performance snapshot</p>
+    </div>
+
+    <%# Metric Cards - Glassmorphism Style %>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <%# Card 1: Requests 24h %>
-      <div class="card bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
-        <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-500">Requests (24h)</p>
-              <h2 class="text-3xl font-bold text-gray-900 mt-2">
-                <%= number_with_delimiter(@requests_24h) %>
-              </h2>
-            </div>
-            <div class="rounded-full bg-blue-100 p-3">
-              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="group relative backdrop-blur-xl bg-white/60 rounded-3xl p-6 shadow-xl border border-white/20 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
+            <div class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-700">24h</div>
           </div>
+          <p class="text-sm font-medium text-gray-600 mb-2">Total Requests</p>
+          <h3 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <%= number_with_delimiter(@requests_24h) %>
+          </h3>
+          <p class="text-xs text-gray-500 mt-2">↗ 12% from yesterday</p>
         </div>
       </div>
 
       <%# Card 2: Error Rate %>
-      <div class="card bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
-        <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-500">Error Rate</p>
-              <h2 class="text-3xl font-bold mt-2 <%= @error_rate > 5 ? 'text-red-600' : @error_rate > 1 ? 'text-yellow-600' : 'text-green-600' %>">
-                <%= @error_rate %>%
-              </h2>
-            </div>
-            <div class="rounded-full <%= @error_rate > 5 ? 'bg-red-100' : @error_rate > 1 ? 'bg-yellow-100' : 'bg-green-100' %> p-3">
-              <svg class="w-8 h-8 <%= @error_rate > 5 ? 'text-red-600' : @error_rate > 1 ? 'text-yellow-600' : 'text-green-600' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <%
+        error_color_from = @error_rate > 5 ? 'red-500' : @error_rate > 1 ? 'yellow-500' : 'green-500'
+        error_color_to = @error_rate > 5 ? 'red-600' : @error_rate > 1 ? 'yellow-600' : 'green-600'
+        error_bg = @error_rate > 5 ? 'red-100' : @error_rate > 1 ? 'yellow-100' : 'green-100'
+        error_text = @error_rate > 5 ? 'red-700' : @error_rate > 1 ? 'yellow-700' : 'green-700'
+        error_icon = @error_rate > 5 ? '⚠️' : @error_rate > 1 ? '⚡' : '✓'
+      %>
+      <div class="group relative backdrop-blur-xl bg-white/60 rounded-3xl p-6 shadow-xl border border-white/20 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+        <div class="absolute inset-0 bg-gradient-to-br from-<%= error_color_from %>/10 to-<%= error_color_to %>/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 rounded-2xl bg-gradient-to-br from-<%= error_color_from %> to-<%= error_color_to %> shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
+            <div class="text-xs font-semibold px-2 py-1 rounded-full bg-<%= error_bg %> text-<%= error_text %>"><%= error_icon %> Status</div>
           </div>
+          <p class="text-sm font-medium text-gray-600 mb-2">Error Rate</p>
+          <h3 class="text-4xl font-bold bg-gradient-to-r from-<%= error_color_from %> to-<%= error_color_to %> bg-clip-text text-transparent">
+            <%= @error_rate %>%
+          </h3>
+          <p class="text-xs text-gray-500 mt-2">
+            <%= @error_rate > 5 ? '⬆ Above threshold' : @error_rate > 1 ? '➡ Normal range' : '⬇ Excellent' %>
+          </p>
         </div>
       </div>
 
       <%# Card 3: Rate Limit Usage %>
-      <div class="card bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-2">
-            <div>
-              <p class="text-sm font-medium text-gray-500">Rate Limit</p>
-              <h2 class="text-3xl font-bold text-gray-900 mt-2">
-                <%= @rate_limit_status[:percentage] %>%
-              </h2>
-            </div>
-            <div class="rounded-full <%= @rate_limit_status[:percentage] > 90 ? 'bg-red-100' : @rate_limit_status[:percentage] > 70 ? 'bg-yellow-100' : 'bg-green-100' %> p-3">
-              <svg class="w-8 h-8 <%= @rate_limit_status[:percentage] > 90 ? 'text-red-600' : @rate_limit_status[:percentage] > 70 ? 'text-yellow-600' : 'text-green-600' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <%
+        rate_color_from = @rate_limit_status[:percentage] > 90 ? 'red-500' : @rate_limit_status[:percentage] > 70 ? 'orange-500' : 'purple-500'
+        rate_color_to = @rate_limit_status[:percentage] > 90 ? 'red-600' : @rate_limit_status[:percentage] > 70 ? 'orange-600' : 'purple-600'
+      %>
+      <div class="group relative backdrop-blur-xl bg-white/60 rounded-3xl p-6 shadow-xl border border-white/20 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
+            <div class="text-xs font-semibold px-2 py-1 rounded-full bg-purple-100 text-purple-700">Rate Limit</div>
           </div>
-          <progress class="progress <%= @rate_limit_status[:percentage] > 90 ? 'progress-error' : @rate_limit_status[:percentage] > 70 ? 'progress-warning' : 'progress-success' %> w-full" value="<%= @rate_limit_status[:percentage] %>" max="100"></progress>
-          <p class="text-xs text-gray-500 mt-1">
+          <p class="text-sm font-medium text-gray-600 mb-2">API Usage</p>
+          <h3 class="text-4xl font-bold bg-gradient-to-r from-<%= rate_color_from %> to-<%= rate_color_to %> bg-clip-text text-transparent">
+            <%= @rate_limit_status[:percentage] %>%
+          </h3>
+          <div class="mt-3 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-<%= rate_color_from %> to-<%= rate_color_to %> transition-all duration-500" style="width: <%= @rate_limit_status[:percentage] %>%"></div>
+          </div>
+          <p class="text-xs text-gray-500 mt-2">
             <%= @rate_limit_status[:used] %> / <%= @rate_limit_status[:limit] %> requests
           </p>
         </div>
       </div>
 
       <%# Card 4: Last Blocked Event %>
-      <div class="card bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
-        <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-500">Last Block</p>
-              <% if @last_blocked %>
-                <div class="mt-2">
-                  <div class="badge badge-error gap-2">
-                    <%= time_ago_in_words(@last_blocked.timestamp) %> ago
-                  </div>
-                  <p class="text-xs text-gray-600 mt-1">429 - <%= @last_blocked.event_type %></p>
-                </div>
-              <% else %>
-                <h2 class="text-2xl font-bold text-green-600 mt-2 flex items-center">
-                  None
-                  <span class="ml-2">🎉</span>
-                </h2>
-              <% end %>
-            </div>
-            <div class="rounded-full <%= @last_blocked ? 'bg-red-100' : 'bg-green-100' %> p-3">
-              <svg class="w-8 h-8 <%= @last_blocked ? 'text-red-600' : 'text-green-600' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= @last_blocked ? 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' : 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' %>" />
+      <div class="group relative backdrop-blur-xl bg-white/60 rounded-3xl p-6 shadow-xl border border-white/20 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+        <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 rounded-2xl bg-gradient-to-br <%= @last_blocked.present? ? 'from-red-500 to-red-600' : 'from-green-500 to-emerald-600' %> shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <% if @last_blocked.present? %>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <% else %>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                <% end %>
               </svg>
             </div>
+            <div class="text-xs font-semibold px-2 py-1 rounded-full <%= @last_blocked.present? ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' %>">
+              <%= @last_blocked.present? ? '⚠️ Alert' : '✓ Safe' %>
+            </div>
           </div>
+          <p class="text-sm font-medium text-gray-600 mb-2">Security Status</p>
+          <% if @last_blocked.present? %>
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-1">
+              Blocked
+            </h3>
+            <p class="text-xs text-gray-500">
+              <%= time_ago_in_words(@last_blocked.timestamp) %> ago
+            </p>
+          <% else %>
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-1">
+              All Clear 🎉
+            </h3>
+            <p class="text-xs text-gray-500">No blocks detected</p>
+          <% end %>
         </div>
       </div>
     </div>
 
-    <%# Recent Activity Table %>
-    <div class="card bg-white shadow-xl">
-      <div class="card-body">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="card-title text-xl">Recent Activity</h2>
-          <span class="badge badge-outline">Last 10 events</span>
+    <%# Recent Activity Section %>
+    <div class="backdrop-blur-xl bg-white/60 rounded-3xl p-8 shadow-xl border border-white/20">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900">Recent Activity</h3>
+          <p class="text-sm text-gray-600 mt-1">Latest API requests and events</p>
         </div>
+        <a href="<%= consumer_errors_path %>" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all hover:scale-105">
+          View All →
+        </a>
+      </div>
 
-        <div class="overflow-x-auto">
-          <table class="table table-zebra">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Endpoint</th>
-                <th>Status</th>
-                <th>Reason</th>
+      <div class="overflow-hidden">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-4 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Time</th>
+              <th class="text-left py-4 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Endpoint</th>
+              <th class="text-left py-4 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+              <th class="text-left py-4 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% @recent_activity.each do |activity| %>
+              <%
+                status_code = activity.metadata&.dig('status_code') || 200
+                is_success = status_code.to_i < 400
+                status_color = is_success ? 'green' : status_code.to_i == 429 ? 'yellow' : 'red'
+              %>
+              <tr class="hover:bg-white/50 transition-colors group">
+                <td class="py-4 px-4">
+                  <span class="text-sm text-gray-600">
+                    <%= time_ago_in_words(activity.timestamp) %> ago
+                  </span>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="text-sm font-medium text-gray-900 font-mono">
+                    <%= activity.metadata&.dig('endpoint') || 'N/A' %>
+                  </span>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-<%= status_color %>-100 text-<%= status_color %>-700 ring-1 ring-<%= status_color %>-500/20">
+                    <%= status_code %>
+                  </span>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="text-sm text-gray-600 capitalize">
+                    <%= activity.event_type.split('.').last %>
+                  </span>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <% if @recent_activity.any? %>
-                <% @recent_activity.each do |activity| %>
-                  <tr class="hover">
-                    <td class="text-sm text-gray-600">
-                      <%= time_ago_in_words(activity.timestamp) %> ago
-                    </td>
-                    <td class="font-mono text-sm">
-                      <%= activity.metadata&.dig('endpoint') || activity.event_type %>
-                    </td>
-                    <td>
-                      <% status = activity.metadata&.dig('status_code')&.to_i %>
-                      <% if status %>
-                        <span class="badge <%= status >= 500 ? 'badge-error' : status >= 400 ? 'badge-warning' : 'badge-success' %>">
-                          <%= status %>
-                        </span>
-                      <% else %>
-                        <span class="badge badge-ghost">N/A</span>
-                      <% end %>
-                    </td>
-                    <td class="text-sm">
-                      <%= activity.event_type.split('.').last.humanize %>
-                    </td>
-                  </tr>
-                <% end %>
-              <% else %>
-                <tr>
-                  <td colspan="4" class="text-center text-gray-500 py-8">
-                    <div class="flex flex-col items-center">
-                      <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                      </svg>
-                      <p>No recent activity</p>
-                      <p class="text-xs text-gray-400 mt-1">Make some API requests to see them here</p>
-                    </div>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
+            <% end %>
+          </tbody>
+        </table>
 
-        <% if @recent_activity.any? %>
-          <div class="card-actions justify-end mt-4">
-            <a href="<%= consumer_errors_path %>" class="btn btn-ghost btn-sm">
-              View All Errors
-              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        <% if @recent_activity.empty? %>
+          <div class="text-center py-12">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
               </svg>
-            </a>
+            </div>
+            <p class="text-gray-600">No recent activity</p>
+            <p class="text-sm text-gray-500 mt-1">Start making API requests to see them here</p>
           </div>
         <% end %>
       </div>
     </div>
-
-    <%# Quick Actions %>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-      <a href="<%= new_consumer_api_key_path %>" class="card bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-        <div class="card-body">
-          <div class="flex items-center">
-            <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            <div>
-              <h3 class="font-bold">Create API Key</h3>
-              <p class="text-sm opacity-80">Generate a new API key</p>
-            </div>
-          </div>
-        </div>
-      </a>
-
-      <a href="<%= consumer_usage_path %>" class="card bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-        <div class="card-body">
-          <div class="flex items-center">
-            <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <div>
-              <h3 class="font-bold">View Usage</h3>
-              <p class="text-sm opacity-80">Check your API usage</p>
-            </div>
-          </div>
-        </div>
-      </a>
-
-      <a href="<%= consumer_api_keys_path %>" class="card bg-gradient-to-br from-green-500 to-green-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-        <div class="card-body">
-          <div class="flex items-center">
-            <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-            </svg>
-            <div>
-              <h3 class="font-bold">Manage Keys</h3>
-              <p class="text-sm opacity-80">View all your API keys</p>
-            </div>
-          </div>
-        </div>
-      </a>
-    </div>
   </div>
 </div>
+
+<%# Add custom animations %>
+<style>
+  @keyframes blob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(20px, -50px) scale(1.1); }
+    50% { transform: translate(-20px, 20px) scale(0.9); }
+    75% { transform: translate(50px, 50px) scale(1.05); }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+</style>

@@ -39,6 +39,18 @@ class MetricsService
       increment_counter("requests:status:#{status_code}")
       increment_counter("requests:user:#{user_id}") if user_id
 
+      # Track per-user endpoint metrics for Usage page
+      if user_id
+        sanitized_endpoint = sanitize_key(endpoint)
+        increment_counter("metrics:user:#{user_id}:endpoint:#{sanitized_endpoint}:count")
+
+        # Track per-user per-minute metrics for chart
+        minute_bucket = timestamp / 60
+        minute_key = "metrics:user:#{user_id}:minute:#{minute_bucket}"
+        $redis.incr(minute_key)
+        $redis.expire(minute_key, 3600) # Keep for 1 hour
+      end
+
       # Record response time
       if response_time
         record_response_time(endpoint, response_time)
