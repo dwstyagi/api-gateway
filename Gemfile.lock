@@ -120,7 +120,7 @@ GEM
       activesupport (>= 6.1)
     groupdate (6.7.0)
       activesupport (>= 7.1)
-    httparty (0.23.2)
+    httparty (0.24.0)
       csv
       mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
@@ -169,7 +169,8 @@ GEM
     mini_mime (1.1.5)
     minitest (5.27.0)
     msgpack (1.8.0)
-    multi_xml (0.6.0)
+    multi_xml (0.8.1)
+      bigdecimal (>= 3.1, < 5)
     net-imap (0.6.0)
       date
       net-protocol
@@ -405,7 +406,7 @@ DEPENDENCIES
   chartkick
   debug
   groupdate
-  httparty (~> 0.21)
+  httparty (~> 0.24)
   importmap-rails
   jbuilder
   jwt (~> 2.7)

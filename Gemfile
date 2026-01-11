@@ -27,7 +27,7 @@ gem "redis", "~> 5.0"
 gem "jwt", "~> 2.7"
 
 # HTTP client for proxying requests to backend services
-gem "httparty", "~> 0.21"
+gem "httparty", "~> 0.24"
 
 # Chartkick for beautiful charts
 gem "chartkick"
