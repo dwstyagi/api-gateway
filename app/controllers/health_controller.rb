@@ -181,7 +181,7 @@ class HealthController < ApplicationController
   # Get request statistics
   def get_request_stats
     {
-      total: MetricsService.get_counter('requests:total'),
+      total: MetricsService.get_request_stats[:total],
       last_minute: MetricsService.calculate_throughput(:minute).round(2)
     }
   rescue StandardError => e
