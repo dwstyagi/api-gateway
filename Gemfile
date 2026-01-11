@@ -24,7 +24,7 @@ gem "bcrypt", "~> 3.1.7"
 gem "redis", "~> 5.0"
 
 # JWT for stateless authentication
-gem "jwt", "~> 2.7"
+gem "jwt", "~> 3.1"
 
 # HTTP client for proxying requests to backend services
 gem "httparty", "~> 0.21"
