@@ -20,6 +20,7 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "animations", "data-turbo-track": "reload" %>
 
     <%# Chartkick for charts (uses Google Charts) %>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
@@ -28,6 +29,7 @@
     <%# Action Cable for WebSockets %>
     <%= javascript_include_tag "actioncable", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "realtime_dashboard", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "dropdown", "data-turbo-track": "reload" %>
 
     <style>
       @keyframes fadeIn {
