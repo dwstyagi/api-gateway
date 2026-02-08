@@ -42,19 +42,6 @@ module ApplicationCable
 
     # Authenticate via session cookie
     def find_user_from_session
-      # Access session from cookies
-      if session_id = cookies.encrypted[:_api_gateway_session]
-        # Rails session handling
-        session_data = Rails.application.config.session_store.new({}).send(:load_session_from_sid, session_id)
-        user_id = session_data&.dig('user_id')
-
-        if user_id
-          user = User.find_by(id: user_id)
-          return user if user
-        end
-      end
-
-      # Alternative: Try to get user_id from request.session
       if request.session[:user_id]
         user = User.find_by(id: request.session[:user_id])
         return user if user

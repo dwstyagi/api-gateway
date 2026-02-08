@@ -39,8 +39,8 @@ class HealthController < ApplicationController
       memory: check_memory
     }
 
-    # Determine overall health
-    all_healthy = checks.values.all? { |check| check[:status] == 'up' }
+    # Determine overall health ('unknown' is acceptable, only 'down' is critical)
+    all_healthy = checks.values.none? { |check| check[:status] == 'down' }
     status_code = all_healthy ? :ok : :service_unavailable
 
     # Get system metrics

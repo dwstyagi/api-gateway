@@ -197,6 +197,9 @@ class AuthenticationMiddleware
   # @return [Boolean]
   def public_route?(path)
     return true if path == '/'
+    return true if path == '/favicon.ico'
+    return true if path.start_with?('/assets')
+    return true if path == '/cable'
 
     public_routes = [
       '/health',     # Health check endpoints (includes /health/detailed)

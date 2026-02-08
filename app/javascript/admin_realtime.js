@@ -1,13 +1,20 @@
 // Admin Real-time Metrics via WebSocket
 // Connects to AdminMetricsChannel and handles real-time updates
-
-import consumer from "./channels/consumer"
+// Uses the global ActionCable object loaded via actioncable.js
 
 document.addEventListener('DOMContentLoaded', () => {
   // Only initialize on admin pages
   if (!document.body.classList.contains('admin-layout')) return;
 
-  const adminMetricsSubscription = consumer.subscriptions.create("AdminMetricsChannel", {
+  // Create Action Cable consumer using the global ActionCable object
+  if (typeof ActionCable === 'undefined') {
+    console.warn('[Admin Metrics] ActionCable not loaded');
+    return;
+  }
+
+  var consumer = ActionCable.createConsumer('/cable');
+
+  var adminMetricsSubscription = consumer.subscriptions.create("AdminMetricsChannel", {
     connected() {
       console.log('[Admin Metrics] Connected to WebSocket');
       this.showConnectionStatus('connected');

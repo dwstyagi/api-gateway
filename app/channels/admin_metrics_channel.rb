@@ -16,7 +16,6 @@
 class AdminMetricsChannel < ApplicationCable::Channel
   def subscribed
     # Only allow admin users to subscribe
-    current_user = env['warden']&.user || reject
     reject unless current_user&.admin?
 
     stream_from 'admin:metrics'
